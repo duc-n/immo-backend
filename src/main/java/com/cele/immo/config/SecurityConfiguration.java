@@ -8,36 +8,25 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
     @Autowired
     UserAccountRepository userAccountRepository;
+
     @Bean
     SecurityWebFilterChain springWebFilterChain(ServerHttpSecurity http) {
         return http
-                .csrf().disable()
                 .authorizeExchange()
-                .pathMatchers("/**").permitAll()
-                //.pathMatchers("/login", "/logout").permitAll()
-                .pathMatchers("/i18n/**",
-                        "/css/**",
-                        "/fonts/**",
-                        "/icons-reference/**",
-                        "/img/**",
-                        "/js/**",
-                        "/vendor/**").permitAll()
-                /*.anyExchange()
-                .authenticated()
+                //.pathMatchers(HttpMethod.GET, "/posts/**").permitAll()
+                //.pathMatchers(HttpMethod.DELETE, "/posts/**").hasRole("ADMIN")
+                //.pathMatchers("/posts/**").authenticated()
+                //.pathMatchers("/users/{user}/**").access(this::currentUserMatchesPath)
+                .anyExchange().permitAll()
                 .and()
-                .formLogin()
-                .loginPage("/login")
-                .and()
-                .logout()
-                .logoutUrl("/logout")*/
-                .and()
+                .csrf().disable()
                 .build();
     }
-
 
 
     @Bean
