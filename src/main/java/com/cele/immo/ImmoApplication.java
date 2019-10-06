@@ -1,19 +1,11 @@
 package com.cele.immo;
 
-import com.cele.immo.model.Role;
-import com.cele.immo.model.UserAccount;
-import com.cele.immo.repository.UserAccountRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @SpringBootApplication
 public class ImmoApplication {
