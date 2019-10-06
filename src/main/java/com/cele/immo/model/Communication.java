@@ -6,7 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class Communication {
-    private String id;
     private Boolean siteWeb;
     private Boolean parselle;
     private String bureauLocal;
