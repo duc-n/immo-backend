@@ -31,7 +31,7 @@ public class ImmoApplication {
     }
 
 
-    @Bean
+   /* @Bean
     CommandLineRunner start(UserAccountRepository userAccountRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             List<Role> roles = new ArrayList<>();
@@ -48,6 +48,6 @@ public class ImmoApplication {
 
             userAccountRepository.findAll().log().subscribe(u -> log.info("user: {}", u));
         };
-    }
+    }*/
 }
 
