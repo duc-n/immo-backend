@@ -2,7 +2,9 @@ package com.cele.immo.controller;
 
 import com.cele.immo.model.Bien;
 import com.cele.immo.repository.BienRepository;
+import com.cele.immo.service.BienService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
@@ -12,9 +14,13 @@ import reactor.core.publisher.Mono;
 @RestController()
 @RequestMapping(value = "/bien")
 @RequiredArgsConstructor
+@Slf4j
 public class BienController {
     @Autowired
     private BienRepository bienRepository;
+
+    @Autowired
+    BienService bienService;
 
     @GetMapping()
     public Flux<Bien> getAllBien() {
@@ -32,6 +38,12 @@ public class BienController {
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "2") Integer size
     ) {
+
+        log.debug("Start searching");
+        bienService.searchCriteria().subscribe(bien -> {
+            log.debug("Bien result :{}", bien);
+        });
+
         return this.bienRepository.findByNomTitulaireLike(ownerName, PageRequest.of(page, size));
     }
 
