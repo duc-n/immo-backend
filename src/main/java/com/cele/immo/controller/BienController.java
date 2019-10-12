@@ -6,7 +6,7 @@ import com.cele.immo.service.BienService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,18 +33,13 @@ public class BienController {
     }
 
     @GetMapping("/searchByOwner")
-    public Flux<Bien> searchByOwner(
+    public Mono<Page<Bien>> searchByOwner(
             @RequestParam() String ownerName,
             @RequestParam(name = "page", defaultValue = "0") Integer page,
             @RequestParam(name = "size", defaultValue = "2") Integer size
     ) {
 
-        log.debug("Start searching");
-        bienService.searchCriteria().subscribe(bien -> {
-            log.debug("Bien result :{}", bien);
-        });
-
-        return this.bienRepository.findByNomTitulaireLike(ownerName, PageRequest.of(page, size));
+        return bienService.searchCriteria();
     }
 
 }

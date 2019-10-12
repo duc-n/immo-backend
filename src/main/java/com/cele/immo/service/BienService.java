@@ -1,8 +1,9 @@
 package com.cele.immo.service;
 
 import com.cele.immo.model.Bien;
-import reactor.core.publisher.Flux;
+import org.springframework.data.domain.Page;
+import reactor.core.publisher.Mono;
 
 public interface BienService {
-    Flux<Bien> searchCriteria();
+    Mono<Page<Bien>> searchCriteria();
 }
