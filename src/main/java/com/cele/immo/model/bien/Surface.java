@@ -1,4 +1,4 @@
-package com.cele.immo.model;
+package com.cele.immo.model.bien;
 
 import lombok.Builder;
 import lombok.Data;

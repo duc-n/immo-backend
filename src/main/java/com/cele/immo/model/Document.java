@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Videos {
-    private String video;
+public class Document {
+    private String id;
+    private String title;
 }

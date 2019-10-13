@@ -1,4 +1,4 @@
-package com.cele.immo.model;
+package com.cele.immo.model.bien;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +14,7 @@ import javax.validation.constraints.Email;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor

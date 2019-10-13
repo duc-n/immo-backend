@@ -1,9 +1,15 @@
-package com.cele.immo.model;
+package com.cele.immo.model.bien;
 
+import com.cele.immo.model.Photo;
+import com.cele.immo.model.Video;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -19,7 +25,9 @@ public class Bien {
     private Visite visite;
     private Surface surface;
     private Descriptif descriptif;
-    private Photos photos;
-    private Videos videos;
+    private List<Photo> photos;
+    private List<Video> videos;
     private Communication communication;
+    @CreatedDate
+    public LocalDateTime createdDate;
 }

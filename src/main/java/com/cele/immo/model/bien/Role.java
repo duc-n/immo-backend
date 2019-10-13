@@ -1,4 +1,4 @@
-package com.cele.immo.model;
+package com.cele.immo.model.bien;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;

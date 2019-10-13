@@ -1,6 +1,7 @@
 package com.cele.immo.service;
 
-import com.cele.immo.model.Bien;
+import com.cele.immo.model.bien.Bien;
+import com.cele.immo.repository.BienRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -18,6 +20,29 @@ import reactor.core.publisher.Mono;
 public class BienServiceImpl implements BienService {
     @Autowired
     ReactiveMongoTemplate template;
+
+    @Autowired
+    BienRepository bienRepository;
+
+    @Override
+    public Mono<Bien> update(Bien bien) {
+        return bienRepository.save(bien);
+    }
+
+    @Override
+    public Mono<Bien> insert(Bien bien) {
+        return bienRepository.insert(bien);
+    }
+
+    @Override
+    public Mono<Bien> findById(String id) {
+        return bienRepository.findById(id);
+    }
+
+    @Override
+    public Flux<Bien> findAll() {
+        return bienRepository.findAll();
+    }
 
     @Override
     public Mono<Page<Bien>> searchCriteria() {
