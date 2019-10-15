@@ -34,7 +34,7 @@ public class MultipartControllerTest {
 
     private MultiValueMap<String, HttpEntity<?>> generateBody() {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
-        builder.part("fileParts", new ClassPathResource("/foo.txt", MultipartControllerTest.class));
+        builder.part("fileParts", new ClassPathResource("/pikachu.png", MultipartControllerTest.class));
         return builder.build();
     }
 
