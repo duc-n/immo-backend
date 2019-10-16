@@ -1,5 +1,6 @@
 package com.cele.immo.controller;
 
+import com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate;
 import org.springframework.http.ResponseEntity;
@@ -8,8 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
@@ -25,7 +24,7 @@ public class MultipartController {
     public Mono<ResponseEntity> upload(@RequestPart Mono<FilePart> fileParts) {
         return fileParts
                 .flatMap(part -> this.gridFsTemplate.store(part.content(), part.filename()))
-                .map((id) -> ok().body(Map.of("id", id.toHexString())));
+                .map((id) -> ok().body(ImmutableMap.of("id", id.toHexString())));
     }
 
 

@@ -8,13 +8,8 @@ import com.cele.immo.model.acquereur.DetailAcquereur;
 import com.cele.immo.model.bien.*;
 import com.cele.immo.repository.AcquereurRepository;
 import com.cele.immo.repository.BienRepository;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.reactivestreams.client.gridfs.helpers.AsyncStreamHelper;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.BsonBinarySubType;
-import org.bson.types.Binary;
-import org.bson.types.ObjectId;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ResourceLoader;
@@ -22,11 +17,8 @@ import org.springframework.data.mongodb.gridfs.GridFsCriteria;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,23 +48,24 @@ public class DataInitializer {
         //Delete all test.png file
         gridFsTemplate.delete(query(GridFsCriteria.whereFilename().is("test.png"))).subscribe();
 
-        InputStream input = new FileInputStream("src/main/resources/pikachu.png");
+        //InputStream input = new FileInputStream("src/main/resources/pikachu.png");
+/*        InputStream input = new ClassPathResource("pikachu.png").getInputStream();
         byte[] inputByte = input.readAllBytes();
         DBObject metaData = new BasicDBObject();
         metaData.put("user", "duc");
-        metaData.put("type", "image");
+        metaData.put("type", "image");*/
 
         List<String> idList = new ArrayList<>();
 
         //Save the test.png file
-        Mono<ObjectId> objectIdMono = gridFsTemplate.store(AsyncStreamHelper.toAsyncInputStream(input), "test.png", "image/png", metaData);
+     /*   Mono<ObjectId> objectIdMono = gridFsTemplate.store(AsyncStreamHelper.toAsyncInputStream(input), "test.png", "image/png", metaData);
 
         objectIdMono.subscribe(objectId -> {
             log.info("ObjectId id {} ", objectId.toString());
             idList.add(objectId.toString());
             log.info("Array list size {}", idList.size());
 
-        });
+        });*/
 
         this.acquereurRepository.deleteAll()
                 .thenMany(
@@ -81,7 +74,7 @@ public class DataInitializer {
                                 .flatMap(
                                         i -> this.acquereurRepository.save(
                                                 Acquereur.builder()
-                                                        .contacts(List.of(Contact.builder().nomPrenom("NGUYEN Duc " + i).build(), Contact.builder().nomPrenom("NGUYEN Cecile " + i).build()))
+                                                        .contacts(Lists.newArrayList(Contact.builder().nomPrenom("NGUYEN Duc " + i).build(), Contact.builder().nomPrenom("NGUYEN Cecile " + i).build()))
                                                         .activite("Informatic " + i)
                                                         .civilite(i % 2 == 1 ? "M." : "Mme")
                                                         .consentementRGPD(i % 2 == 1 ? Boolean.TRUE : Boolean.FALSE)
@@ -101,16 +94,16 @@ public class DataInitializer {
                                                         .newsLettre(i % 2 == 1 ? Boolean.TRUE : Boolean.FALSE)
                                                         .nom("REBER")
                                                         .prenom("Guilaume")
-                                                        .notes(List.of("Test comment 1", "Test comment 2"))
+                                                        .notes(Lists.newArrayList("Test comment 1", "Test comment 2"))
                                                         .origine("Origine")
                                                         .societe("CELETEST")
                                                         .pourcentHonoraires(new BigDecimal("7.6"))
                                                         .societeEnCreation(i % 2 == 1 ? Boolean.TRUE : Boolean.FALSE)
                                                         .tel("012345678")
                                                         .topAcquereur(i % 2 == 1 ? Boolean.TRUE : Boolean.FALSE)
-                                                        .documents(List.of(Document.builder()
+                                                        .documents(Lists.newArrayList(Document.builder()
                                                                 .title("Photo")
-                                                                .id(idList.get(0))
+                                                                //.id(idList.get(0))
                                                                 .build()
 
                                                         ))
@@ -226,8 +219,8 @@ public class DataInitializer {
                                                                 .interphone("94344")
                                                                 .build()
                                                         )
-                                                        .photos(List.of(Photo.builder().title("Image")
-                                                                .image(new Binary(BsonBinarySubType.BINARY, inputByte))
+                                                        .photos(Lists.newArrayList(Photo.builder().title("Image")
+                                                                //.image(new Binary(BsonBinarySubType.BINARY, inputByte))
                                                                 .build()
                                                         ))
                                                         .build()
