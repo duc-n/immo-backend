@@ -1,13 +1,17 @@
 package com.cele.immo.config;
 
+import com.cele.immo.model.Client;
 import com.cele.immo.model.Document;
 import com.cele.immo.model.Photo;
+import com.cele.immo.model.UserAccount;
 import com.cele.immo.model.acquereur.Acquereur;
 import com.cele.immo.model.acquereur.Contact;
 import com.cele.immo.model.acquereur.DetailAcquereur;
 import com.cele.immo.model.bien.*;
 import com.cele.immo.repository.AcquereurRepository;
 import com.cele.immo.repository.BienRepository;
+import com.cele.immo.repository.ClientRepository;
+import com.cele.immo.repository.UserAccountRepository;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -17,6 +21,7 @@ import org.springframework.data.mongodb.gridfs.GridFsCriteria;
 import org.springframework.data.mongodb.gridfs.ReactiveGridFsTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -29,16 +34,21 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 @Slf4j
 public class DataInitializer {
     private final BienRepository bienRepository;
-
+    private final ClientRepository clientRepository;
     private final AcquereurRepository acquereurRepository;
+    private final UserAccountRepository userAccountRepository;
     private final ReactiveGridFsTemplate gridFsTemplate;
     private final ResourceLoader resourceLoader;
 
-    public DataInitializer(BienRepository bienRepository, AcquereurRepository acquereurRepository, ReactiveGridFsTemplate gridFsTemplate, ResourceLoader resourceLoader) {
+    public DataInitializer(BienRepository bienRepository, AcquereurRepository acquereurRepository,
+                           ReactiveGridFsTemplate gridFsTemplate, ResourceLoader resourceLoader,
+                           ClientRepository clientRepository, UserAccountRepository userAccountRepository) {
         this.bienRepository = bienRepository;
         this.acquereurRepository = acquereurRepository;
         this.gridFsTemplate = gridFsTemplate;
         this.resourceLoader = resourceLoader;
+        this.clientRepository = clientRepository;
+        this.userAccountRepository = userAccountRepository;
     }
 
     @EventListener(value = ContextRefreshedEvent.class)
@@ -66,6 +76,48 @@ public class DataInitializer {
             log.info("Array list size {}", idList.size());
 
         });*/
+
+
+        Mono<List<UserAccount>> users = this.userAccountRepository.deleteAll()
+                .thenMany(
+                        Flux
+                                .range(0, 10)
+                                .flatMap(
+                                        i -> this.userAccountRepository.save(
+                                                UserAccount.builder()
+                                                        .username(String.format("duc.nguyen%s@gmail.com", i))
+                                                        .firstName("duc")
+                                                        .lastName("nguyen")
+                                                        .active(Boolean.TRUE)
+                                                        .build()
+
+                                        )
+                                )).collectList();
+
+        List<UserAccount> userList = users.block();
+
+        this.clientRepository.deleteAll()
+                .thenMany(
+                        Flux
+                                .range(0, 10)
+                                .flatMap(
+                                        i -> this.clientRepository.save(
+                                                Client.builder()
+                                                        .civilite("Mr")
+                                                        .adresse("11 Av Mac Mahon")
+                                                        .nom("QUACH")
+                                                        .consultants(userList)
+                                                        .build()
+
+                                        )
+                                ))
+                .log()
+                .subscribe(
+                        null,
+                        null,
+                        () -> log.info("done acquereur initialization...")
+                );
+
 
         this.acquereurRepository.deleteAll()
                 .thenMany(

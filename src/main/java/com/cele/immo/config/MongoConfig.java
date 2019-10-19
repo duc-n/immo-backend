@@ -14,4 +14,9 @@ public class MongoConfig {
     public ReactiveGridFsTemplate reactiveGridFsTemplate(ReactiveMongoDatabaseFactory reactiveMongoDbFactory, MappingMongoConverter mappingMongoConverter) {
         return new ReactiveGridFsTemplate(reactiveMongoDbFactory, mappingMongoConverter);
     }
+
+    /*@Bean
+    public CascadeSaveMongoEventListener userCascadingMongoEventListener() {
+        return new CascadeSaveMongoEventListener();
+    }*/
 }

@@ -1,6 +1,6 @@
 package com.cele.immo.repository;
 
-import com.cele.immo.model.bien.UserAccount;
+import com.cele.immo.model.UserAccount;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Mono;
 

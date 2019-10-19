@@ -1,5 +1,6 @@
-package com.cele.immo.model.bien;
+package com.cele.immo.model;
 
+import com.cele.immo.model.bien.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
