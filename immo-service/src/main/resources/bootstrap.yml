@@ -1,0 +1,15 @@
+server:
+  port: 8080
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka}
+spring:
+  application:
+    name: immo-service
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        serviceId: config-server
+      failFast: true
