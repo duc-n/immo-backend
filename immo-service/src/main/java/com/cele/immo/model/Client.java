@@ -1,6 +1,5 @@
 package com.cele.immo.model;
 
-import com.cele.immo.annotation.CascadeSave;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -30,6 +29,6 @@ public class Client {
     private Boolean alertEmail;
 
     @DBRef
-    @CascadeSave
+    //@CascadeSave
     private List<UserAccount> consultants;
 }

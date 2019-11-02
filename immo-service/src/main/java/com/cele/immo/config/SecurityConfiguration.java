@@ -18,6 +18,7 @@ public class SecurityConfiguration {
     SecurityWebFilterChain springWebFilterChain(ServerHttpSecurity http) {
         return http
                 .authorizeExchange()
+                .pathMatchers("/actuator/**").permitAll()
                 //.pathMatchers(HttpMethod.GET, "/posts/**").permitAll()
                 //.pathMatchers(HttpMethod.DELETE, "/posts/**").hasRole("ADMIN")
                 //.pathMatchers("/posts/**").authenticated()
