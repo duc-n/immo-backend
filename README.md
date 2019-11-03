@@ -12,4 +12,23 @@
  docker-compose down
  docker-compose up -d
  
+ You will also need to give yourself admin privileges on the cluster:
+ kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value core/account)
  
+ 
+ docker tag celeduc/microservice-docker-immo-service:0.0.1-SNAPSHOT eu.gcr.io/celeduc/microservice-docker-immo-service:0.0.1-SNAPSHOT;  
+ docker push eu.gcr.io/celeduc/microservice-docker-immo-service:0.0.1-SNAPSHOT;
+ 
+ docker tag celeduc/microservice-docker-api-gateway:0.0.1-SNAPSHOT eu.gcr.io/celeduc/microservice-docker-api-gateway:0.0.1-SNAPSHOT;  
+ docker push eu.gcr.io/celeduc/microservice-docker-immo-service:0.0.1-SNAPSHOT;
+  
+ docker tag celeduc/microservice-docker-discovery-service:0.0.1-SNAPSHOT eu.gcr.io/celeduc/microservice-docker-discovery-service:0.0.1-SNAPSHOT;  
+ docker push eu.gcr.io/celeduc/microservice-docker-discovery-service:0.0.1-SNAPSHOT;
+   
+ docker tag celeduc/microservice-docker-config:0.0.1-SNAPSHOT eu.gcr.io/celeduc/microservice-docker-config:0.0.1-SNAPSHOT;  
+ docker push eu.gcr.io/celeduc/microservice-docker-config:0.0.1-SNAPSHOT;
+ 
+ 
+ docker push [HOSTNAME]/[PROJECT-ID]/[IMAGE]:[TAG]
+ 
+ gcloud container images list-tags eu.gcr.io/celeduc/microservice-docker-immo-service
