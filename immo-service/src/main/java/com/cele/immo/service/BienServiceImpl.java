@@ -1,5 +1,6 @@
 package com.cele.immo.service;
 
+import com.cele.immo.dto.BienCritere;
 import com.cele.immo.model.bien.Bien;
 import com.cele.immo.repository.BienRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,9 @@ public class BienServiceImpl implements BienService {
     }
 
     @Override
-    public Mono<Page<Bien>> searchCriteria() {
+    public Mono<Page<Bien>> searchCriteria(BienCritere bienCritere) {
+        log.debug("searchCriteria begin. BienCritere : {}", bienCritere);
+
         Pageable pageable = PageRequest.of(0, 10);
 
         Query query = new Query().with(pageable);
@@ -60,6 +63,7 @@ public class BienServiceImpl implements BienService {
         Mono<Page<Bien>> pageBienMono = template.count(query, Bien.class).zipWhen(c -> template.find(query, Bien.class).collectList())
                 .map(tuple -> PageableExecutionUtils.getPage(tuple.getT2(), pageable, () -> tuple.getT1()));
 
+        log.debug("searchCriteria end");
         return pageBienMono;
     }
 }

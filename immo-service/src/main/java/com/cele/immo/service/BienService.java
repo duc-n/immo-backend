@@ -1,5 +1,6 @@
 package com.cele.immo.service;
 
+import com.cele.immo.dto.BienCritere;
 import com.cele.immo.model.bien.Bien;
 import org.springframework.data.domain.Page;
 import reactor.core.publisher.Flux;
@@ -14,6 +15,6 @@ public interface BienService {
 
     Flux<Bien> findAll();
 
-    Mono<Page<Bien>> searchCriteria();
+    Mono<Page<Bien>> searchCriteria(BienCritere bienCritere);
 
 }

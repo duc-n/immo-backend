@@ -1,5 +1,8 @@
 package com.cele.immo.dto;
 
+import lombok.Data;
+
+@Data
 public class BienCritere {
     private String typeBien;
     private String consultant;

@@ -1,8 +1,8 @@
 package com.cele.immo.controller;
 
+import com.cele.immo.dto.BienCritere;
 import com.cele.immo.model.bien.Bien;
 import com.cele.immo.service.BienService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,7 +12,6 @@ import reactor.core.publisher.Mono;
 
 @RestController()
 @RequestMapping(value = "/bien")
-@RequiredArgsConstructor
 @Slf4j
 public class BienController {
     @Autowired
@@ -35,7 +34,14 @@ public class BienController {
             @RequestParam(name = "size", defaultValue = "2") Integer size
     ) {
 
-        return bienService.searchCriteria();
+        return bienService.searchCriteria(null);
     }
+
+    @PostMapping("/rechercherBien")
+    public Mono<Page<Bien>> rechercherBien(@RequestBody BienCritere bienCritere) {
+        log.info("rechercherBien called. Bien critere : {}", bienCritere);
+        return bienService.searchCriteria(bienCritere);
+    }
+
 
 }
