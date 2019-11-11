@@ -6,8 +6,10 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -17,7 +19,10 @@ import java.util.List;
 public class Bien {
     @Id
     private String id;
-    private String nomTitulaire;
+    @Indexed
+    @NotEmpty
+    private String consultantId;
+    private EtatBien etat;
     private DetailBien detailBien;
     private Mandat mandat;
     private Bail bail;

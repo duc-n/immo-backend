@@ -2,10 +2,12 @@ package com.cele.immo.controller;
 
 import com.cele.immo.dto.BienCritere;
 import com.cele.immo.model.bien.Bien;
+import com.cele.immo.repository.BienRepository;
 import com.cele.immo.service.BienService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,6 +19,9 @@ public class BienController {
     @Autowired
     BienService bienService;
 
+    @Autowired
+    BienRepository bienRepository;
+
     @GetMapping()
     public Flux<Bien> getAllBien() {
         return this.bienService.findAll();
@@ -27,21 +32,21 @@ public class BienController {
         return this.bienService.findById(id);
     }
 
-    @GetMapping("/searchByOwner")
-    public Mono<Page<Bien>> searchByOwner(
-            @RequestParam() String ownerName,
-            @RequestParam(name = "page", defaultValue = "0") Integer page,
-            @RequestParam(name = "size", defaultValue = "2") Integer size
-    ) {
-
-        return bienService.searchCriteria(null);
-    }
-
     @PostMapping("/rechercherBien")
-    public Mono<Page<Bien>> rechercherBien(@RequestBody BienCritere bienCritere) {
+    public Page<Bien> rechercherBien(@RequestBody BienCritere bienCritere) {
         log.info("rechercherBien called. Bien critere : {}", bienCritere);
         return bienService.searchCriteria(bienCritere);
     }
 
+    @PutMapping("{id}")
+    public Mono<ResponseEntity<Bien>> updateBie(@PathVariable(value = "id") String id, @RequestBody Bien bien) {
+        return bienRepository.findById(id)
+                .flatMap(existingBien -> {
+                    existingBien.setMandat(bien.getMandat());
+                    return bienRepository.save(existingBien);
+                })
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
 }

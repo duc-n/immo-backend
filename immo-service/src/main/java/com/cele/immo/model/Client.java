@@ -2,7 +2,6 @@ package com.cele.immo.model;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
@@ -28,7 +27,6 @@ public class Client {
     private Boolean consentementRGPD;
     private Boolean alertEmail;
 
-    @DBRef
     //@CascadeSave
-    private List<UserAccount> consultants;
+    private List<String> consultantIds;
 }

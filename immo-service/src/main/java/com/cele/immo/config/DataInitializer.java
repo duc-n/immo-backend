@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.data.mongodb.core.query.Query.query;
 
@@ -81,11 +82,12 @@ public class DataInitializer {
         Mono<List<UserAccount>> users = this.userAccountRepository.deleteAll()
                 .thenMany(
                         Flux
-                                .range(0, 10)
+                                .range(0, 1)
                                 .flatMap(
                                         i -> this.userAccountRepository.save(
                                                 UserAccount.builder()
-                                                        .username(String.format("duc.nguyen%s@gmail.com", i))
+                                                        .username(String.format("duc.nguyen@gmail.com", i))
+                                                        .phoneNumber("0686955644")
                                                         .firstName("duc")
                                                         .lastName("nguyen")
                                                         .active(Boolean.TRUE)
@@ -95,6 +97,7 @@ public class DataInitializer {
                                 )).collectList();
 
         List<UserAccount> userList = users.block();
+
 
         this.clientRepository.deleteAll()
                 .thenMany(
@@ -106,7 +109,7 @@ public class DataInitializer {
                                                         .civilite("Mr")
                                                         .adresse("11 Av Mac Mahon")
                                                         .nom("QUACH")
-                                                        .consultants(userList)
+                                                        .consultantIds(userList.stream().map(c -> c.getUsername()).collect(Collectors.toList()))
                                                         .build()
 
                                         )
@@ -178,7 +181,7 @@ public class DataInitializer {
                                 .flatMap(
                                         i -> this.bienRepository.save(
                                                 Bien.builder()
-                                                        .nomTitulaire("Cele " + i)
+                                                        .consultantId(userList.get(0).getUsername())
                                                         .detailBien(DetailBien.builder()
                                                                 .typeBien("Type Bien " + i)
                                                                 .nomMagasin("Magasin " + i)
@@ -191,8 +194,8 @@ public class DataInitializer {
                                                                         .build()
                                                                 )
                                                                 .activites(Activites.builder()
-                                                                        .licence(Boolean.TRUE)
-                                                                        .popupStore(Boolean.TRUE)
+                                                                        .licence(i % 2 == 1 ? Boolean.FALSE : Boolean.TRUE)
+                                                                        .popupStore(i % 2 == 1 ? Boolean.TRUE : Boolean.FALSE)
                                                                         .terrasse(Boolean.TRUE)
                                                                         .build()
                                                                 )
@@ -247,7 +250,7 @@ public class DataInitializer {
                                                         .mandat(Mandat.builder()
                                                                 .typeMandat("Mandat type")
                                                                 .panneau(Boolean.TRUE)
-                                                                .prixVente(20000L)
+                                                                .prixVente(200000L + (i * 100))
                                                                 .transaction("Transaction")
                                                                 .build()
                                                         )
@@ -259,7 +262,7 @@ public class DataInitializer {
                                                                 .surfaceRDC(16)
                                                                 .surfaceSousSol(24)
                                                                 .surfaceSousSolFonderee(10)
-                                                                .surfaceTotale(100)
+                                                                .surfaceTotale(100 + (i * 30))
                                                                 .surfaceVente(Boolean.TRUE)
                                                                 .build()
                                                         )
