@@ -7,9 +7,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface BienService {
-    Mono<Bien> update(Bien bien);
-
-    Mono<Bien> insert(Bien bien);
+    Mono<Bien> save(Bien bien);
 
     Mono<Bien> findById(String id);
 

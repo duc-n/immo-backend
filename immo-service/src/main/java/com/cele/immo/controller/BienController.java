@@ -2,7 +2,6 @@ package com.cele.immo.controller;
 
 import com.cele.immo.dto.BienCritere;
 import com.cele.immo.model.bien.Bien;
-import com.cele.immo.repository.BienRepository;
 import com.cele.immo.service.BienService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +17,6 @@ import reactor.core.publisher.Mono;
 public class BienController {
     @Autowired
     BienService bienService;
-
-    @Autowired
-    BienRepository bienRepository;
 
     @GetMapping()
     public Flux<Bien> getAllBien() {
@@ -38,12 +34,12 @@ public class BienController {
         return bienService.searchCriteria(bienCritere);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public Mono<ResponseEntity<Bien>> updateBie(@PathVariable(value = "id") String id, @RequestBody Bien bien) {
-        return bienRepository.findById(id)
+        return bienService.findById(id)
                 .flatMap(existingBien -> {
                     existingBien.setMandat(bien.getMandat());
-                    return bienRepository.save(existingBien);
+                    return bienService.save(existingBien);
                 })
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());

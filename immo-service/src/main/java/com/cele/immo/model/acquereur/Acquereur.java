@@ -1,6 +1,7 @@
 package com.cele.immo.model.acquereur;
 
 
+import com.cele.immo.model.Civilite;
 import com.cele.immo.model.Document;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +14,7 @@ import java.util.List;
 @Data
 @Builder
 public class Acquereur {
-    private String civilite;
+    private Civilite civilite;
     private String nom;
     private String prenom;
     private Boolean societeEnCreation;

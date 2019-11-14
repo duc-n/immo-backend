@@ -1,9 +1,6 @@
 package com.cele.immo.config;
 
-import com.cele.immo.model.Client;
-import com.cele.immo.model.Document;
-import com.cele.immo.model.Photo;
-import com.cele.immo.model.UserAccount;
+import com.cele.immo.model.*;
 import com.cele.immo.model.acquereur.Acquereur;
 import com.cele.immo.model.acquereur.Contact;
 import com.cele.immo.model.acquereur.DetailAcquereur;
@@ -98,7 +95,6 @@ public class DataInitializer {
 
         List<UserAccount> userList = users.block();
 
-
         this.clientRepository.deleteAll()
                 .thenMany(
                         Flux
@@ -106,10 +102,13 @@ public class DataInitializer {
                                 .flatMap(
                                         i -> this.clientRepository.save(
                                                 Client.builder()
-                                                        .civilite("Mr")
+                                                        .nom("TRAN")
+                                                        .prenom("An")
+                                                        .civilite(i % 2 == 1 ? Civilite.M : Civilite.MME)
                                                         .adresse("11 Av Mac Mahon")
-                                                        .nom("QUACH")
+                                                        .email("test" + i + "@gmail.com")
                                                         .consultantIds(userList.stream().map(c -> c.getUsername()).collect(Collectors.toList()))
+                                                        .tel("06865678" + i)
                                                         .build()
 
                                         )
@@ -131,7 +130,7 @@ public class DataInitializer {
                                                 Acquereur.builder()
                                                         .contacts(Lists.newArrayList(Contact.builder().nomPrenom("NGUYEN Duc " + i).build(), Contact.builder().nomPrenom("NGUYEN Cecile " + i).build()))
                                                         .activite("Informatic " + i)
-                                                        .civilite(i % 2 == 1 ? "M." : "Mme")
+                                                        .civilite(i % 2 == 1 ? Civilite.M : Civilite.MME)
                                                         .consentementRGPD(i % 2 == 1 ? Boolean.TRUE : Boolean.FALSE)
                                                         .consultantTitulaire("TOTO")
                                                         .demandeRdv(i % 2 == 1 ? Boolean.TRUE : Boolean.FALSE)

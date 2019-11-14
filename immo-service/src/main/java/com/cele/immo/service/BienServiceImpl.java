@@ -35,13 +35,8 @@ public class BienServiceImpl implements BienService {
     UserAccountRepository userAccountRepository;
 
     @Override
-    public Mono<Bien> update(Bien bien) {
+    public Mono<Bien> save(Bien bien) {
         return bienRepository.save(bien);
-    }
-
-    @Override
-    public Mono<Bien> insert(Bien bien) {
-        return bienRepository.insert(bien);
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.cele.immo.model;
 
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
@@ -10,10 +12,14 @@ import java.util.List;
 @Data
 @Document
 public class Client {
+    @Id
+    private String id;
     private String typeClient;
     private String typeContact;
-    private String civilite;
+    private Civilite civilite;
+    @TextIndexed
     private String nom;
+    @TextIndexed
     private String prenom;
     private Boolean societeEnCreation;
     private String societe;
@@ -22,6 +28,7 @@ public class Client {
     private String email;
     private String emailSupp;
     private String activite;
+    private Boolean topAcquereur;
     private Boolean demandeRdv;
     private Boolean newsLettre;
     private Boolean consentementRGPD;
