@@ -28,7 +28,16 @@
  docker tag celeduc/microservice-docker-config:0.0.1-SNAPSHOT eu.gcr.io/celeduc/microservice-docker-config:0.0.1-SNAPSHOT;  
  docker push eu.gcr.io/celeduc/microservice-docker-config:0.0.1-SNAPSHOT;
  
+ docker build -t celeduc/immo-front:0.0.1-SNAPSHOT .
+ 
+  docker tag celeduc/immo-front:0.0.1-SNAPSHOT eu.gcr.io/celeduc/immo-front:0.0.1-SNAPSHOT; 
+ 
+  docker push eu.gcr.io/celeduc/immo-front:0.0.1-SNAPSHOT;
+  
+    docker push eu.gcr.io/celeduc/microservice-docker-config:0.0.1-SNAPSHOT;
  
  docker push [HOSTNAME]/[PROJECT-ID]/[IMAGE]:[TAG]
  
  gcloud container images list-tags eu.gcr.io/celeduc/microservice-docker-immo-service
+ 
+  gcloud container images list-tags eu.gcr.io/celeduc/immo-front
