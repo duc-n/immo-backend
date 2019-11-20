@@ -1,18 +1,20 @@
 package com.cele.immo.service;
 
 import com.cele.immo.dto.BienCritere;
+import com.cele.immo.dto.BienDTO;
 import com.cele.immo.model.UserAccount;
 import com.cele.immo.model.bien.Bien;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 @Slf4j
@@ -40,8 +43,7 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
     public Page<Bien> searchBienCriteria(BienCritere bienCritere) {
 
         Pageable pageable = PageRequest.of(0, 10);
-
-        Query query = new Query().with(pageable);
+        List<AggregationOperation> matchOperations = new ArrayList<>();
 
         //Consultant name
         if (StringUtils.hasText(bienCritere.getConsultant())) {
@@ -57,25 +59,45 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
             }
 
             Criteria idsConsultants = Criteria.where("consultantId").in(consultantsIds);
-
-            query.addCriteria(idsConsultants);
+            matchOperations.add(Aggregation.match(idsConsultants));
         }
 
         // popupStore opt
         if (BooleanUtils.isTrue(bienCritere.getPopupStore())) {
-            query.addCriteria(Criteria.where("detailBien.activites.popupStore").is(Boolean.TRUE));
-
+            matchOperations.add(Aggregation.match(Criteria.where("detailBien.activites.popupStore").is(Boolean.TRUE)));
         }
 
-        matchSurfaceCriteria(query, bienCritere);
+        matchSurfaceCriteria(matchOperations, bienCritere);
 
-        List<Bien> biens = mongoTemplate.find(query, Bien.class, "bien");
-        log.debug("Bien size : {}", biens.size());
+        matchOperations.add(getProjectOperation());
 
-        return PageableExecutionUtils.getPage(biens, pageable, () -> mongoTemplate.count(query, Bien.class));
+
+        matchOperations.add(new SkipOperation(pageable.getPageNumber() * pageable.getPageSize()));
+        matchOperations.add(new LimitOperation(pageable.getPageSize()));
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                matchOperations
+        );
+
+        //Convert the aggregation result into a List
+        List<BienDTO> biens
+                = mongoTemplate.aggregate(aggregation, Bien.class, BienDTO.class).getMappedResults();
+        //List<Bien> biens = mongoTemplate.find(query, Bien.class, "bien");
+
+        //return PageableExecutionUtils.getPage(biens, pageable, () -> mongoTemplate.count(query, Bien.class));
+
+        return new PageImpl(biens, pageable, biens.size());
     }
 
-    private void matchSurfaceCriteria(Query query, BienCritere bienCritere) {
+
+    private ProjectionOperation getProjectOperation() {
+        return project("id")
+                .and("detailBien.adresseBien.adresse").as("adresse")
+                .and("detailBien.adresseBien.codePostal").as("codePostal")
+                ;
+    }
+
+    private void matchSurfaceCriteria(List<AggregationOperation> matchOperations, BienCritere bienCritere) {
 
         Criteria surfaceCriteria = where("surface.surfaceTotale");
         boolean hasSurface = false;
@@ -92,7 +114,7 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
 
         }
         if (hasSurface) {
-            query.addCriteria(surfaceCriteria);
+            matchOperations.add(Aggregation.match(surfaceCriteria));
         }
 
     }
