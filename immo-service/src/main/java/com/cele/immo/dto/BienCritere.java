@@ -1,5 +1,6 @@
 package com.cele.immo.dto;
 
+import com.cele.immo.model.Page;
 import lombok.Data;
 
 @Data
@@ -59,4 +60,6 @@ public class BienCritere {
     private Boolean zoneResidentielle;
     private Boolean centreCommercial;
     private Boolean zac;
+
+    private Page page;
 }

@@ -42,8 +42,17 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
     @Override
     public Page<Bien> searchBienCriteria(BienCritere bienCritere) {
 
-        Pageable pageable = PageRequest.of(0, 10);
+        com.cele.immo.model.Page page = bienCritere.getPage();
+        Pageable pageable;
+
+        if (Objects.nonNull(page)) {
+            pageable = PageRequest.of(page.getPageNumber(), page.getSize() > 0 ? page.getSize() : 10);
+        } else {
+            pageable = PageRequest.of(0, 10);
+        }
+
         List<AggregationOperation> matchOperations = new ArrayList<>();
+        Query countQuery = new Query();
 
         //Consultant name
         if (StringUtils.hasText(bienCritere.getConsultant())) {
@@ -59,34 +68,32 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
             }
 
             Criteria idsConsultants = Criteria.where("consultantId").in(consultantsIds);
-            matchOperations.add(Aggregation.match(idsConsultants));
+
+            addCriteria(idsConsultants, countQuery, matchOperations);
         }
 
         // popupStore opt
         if (BooleanUtils.isTrue(bienCritere.getPopupStore())) {
-            matchOperations.add(Aggregation.match(Criteria.where("detailBien.activites.popupStore").is(Boolean.TRUE)));
+            addCriteria(Criteria.where("detailBien.activites.popupStore").is(Boolean.TRUE), countQuery, matchOperations);
         }
 
-        matchSurfaceCriteria(matchOperations, bienCritere);
+        matchSurfaceCriteria(bienCritere, countQuery, matchOperations);
 
         matchOperations.add(getProjectOperation());
-
 
         matchOperations.add(new SkipOperation(pageable.getPageNumber() * pageable.getPageSize()));
         matchOperations.add(new LimitOperation(pageable.getPageSize()));
 
-        Aggregation aggregation = Aggregation.newAggregation(
-                matchOperations
-        );
+        Aggregation aggregation = Aggregation.newAggregation(matchOperations);
 
         //Convert the aggregation result into a List
-        List<BienDTO> biens
-                = mongoTemplate.aggregate(aggregation, Bien.class, BienDTO.class).getMappedResults();
-        //List<Bien> biens = mongoTemplate.find(query, Bien.class, "bien");
+        List<BienDTO> biens = mongoTemplate.aggregate(aggregation, Bien.class, BienDTO.class).getMappedResults();
+
+        long total = mongoTemplate.count(countQuery, Bien.class);
+        log.debug("Total bien result : {}", total);
 
         //return PageableExecutionUtils.getPage(biens, pageable, () -> mongoTemplate.count(query, Bien.class));
-
-        return new PageImpl(biens, pageable, biens.size());
+        return new PageImpl(biens, pageable, total);
     }
 
 
@@ -97,7 +104,7 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
                 ;
     }
 
-    private void matchSurfaceCriteria(List<AggregationOperation> matchOperations, BienCritere bienCritere) {
+    private void matchSurfaceCriteria(BienCritere bienCritere, Query query, List<AggregationOperation> matchOperations) {
 
         Criteria surfaceCriteria = where("surface.surfaceTotale");
         boolean hasSurface = false;
@@ -114,8 +121,13 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
 
         }
         if (hasSurface) {
-            matchOperations.add(Aggregation.match(surfaceCriteria));
+            addCriteria(surfaceCriteria, query, matchOperations);
         }
 
+    }
+
+    private void addCriteria(Criteria criteria, Query query, List<AggregationOperation> matchOperations) {
+        query.addCriteria(criteria);
+        matchOperations.add(Aggregation.match(criteria));
     }
 }
