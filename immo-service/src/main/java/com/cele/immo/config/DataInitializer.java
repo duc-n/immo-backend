@@ -181,6 +181,7 @@ public class DataInitializer {
                                         i -> this.bienRepository.save(
                                                 Bien.builder()
                                                         .consultantId(userList.get(0).getUsername())
+                                                        .etat(i % 2 == 1 ? EtatBien.CREATION : EtatBien.ACTIVE)
                                                         .detailBien(DetailBien.builder()
                                                                 .typeBien("Type Bien " + i)
                                                                 .nomMagasin("Magasin " + i)

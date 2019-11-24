@@ -2,6 +2,7 @@ package com.cele.immo.service;
 
 import com.cele.immo.dto.BienCritere;
 import com.cele.immo.dto.BienDTO;
+import com.cele.immo.dto.BienMatch;
 import com.cele.immo.model.UserAccount;
 import com.cele.immo.model.bien.Bien;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +55,7 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
         List<AggregationOperation> matchOperations = new ArrayList<>();
         Query countQuery = new Query();
 
-        //Consultant name
+        // consultant name
         if (StringUtils.hasText(bienCritere.getConsultant())) {
             Query consultantNameQuery = new Query();
             Criteria regexLastName = Criteria.where("lastName").regex(bienCritere.getConsultant(), "i");// i option for case insensitive.
@@ -72,12 +73,36 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
             addCriteria(idsConsultants, countQuery, matchOperations);
         }
 
+        // type de bien
+        if (StringUtils.hasText(bienCritere.getTypeBien())) {
+            Criteria typeBien = Criteria.where("detailBien.typeBien").is(bienCritere.getTypeBien());
+            addCriteria(typeBien, countQuery, matchOperations);
+        }
+
         // popupStore opt
         if (BooleanUtils.isTrue(bienCritere.getPopupStore())) {
             addCriteria(Criteria.where("detailBien.activites.popupStore").is(Boolean.TRUE), countQuery, matchOperations);
         }
 
-        matchSurfaceCriteria(bienCritere, countQuery, matchOperations);
+        //surface.surfaceTotale
+        BienMatch surfaceTotalMatch = BienMatch.builder()
+                .criteriaName("surface.surfaceTotale")
+                .valueMin(bienCritere.getSurfaceTotaleMin())
+                .valueMax(bienCritere.getSurfaceTotaleMax())
+                .build();
+        matchBetween(surfaceTotalMatch, countQuery, matchOperations);
+
+        // adresse
+        if (StringUtils.hasText(bienCritere.getAdresse())) {
+            Criteria regexAdresse = Criteria.where("detailBien.adresseBien.adresse").regex(bienCritere.getAdresse(), "i");// i option for case insensitive.
+            addCriteria(regexAdresse, countQuery, matchOperations);
+        }
+
+        // codePostal
+        if (StringUtils.hasText(bienCritere.getCodePostal())) {
+            Criteria regexCodePostal = Criteria.where("detailBien.adresseBien.codePostal").regex(bienCritere.getCodePostal(), "i");// i option for case insensitive.
+            addCriteria(regexCodePostal, countQuery, matchOperations);
+        }
 
         matchOperations.add(getProjectOperation());
 
@@ -104,23 +129,22 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
                 ;
     }
 
-    private void matchSurfaceCriteria(BienCritere bienCritere, Query query, List<AggregationOperation> matchOperations) {
 
-        Criteria surfaceCriteria = where("surface.surfaceTotale");
-        boolean hasSurface = false;
-        // surfaceTotaleMin
-        if (Objects.nonNull(bienCritere.getSurfaceTotaleMin())) {
-            surfaceCriteria.gte(bienCritere.getSurfaceTotaleMin());
-            hasSurface = true;
+    private void matchBetween(BienMatch bienMatch, Query query, List<AggregationOperation> matchOperations) {
 
-        }
-        // surfaceTotaleMax
-        if (Objects.nonNull(bienCritere.getSurfaceTotaleMax())) {
-            surfaceCriteria.lte(bienCritere.getSurfaceTotaleMax());
-            hasSurface = true;
+        Criteria surfaceCriteria = where(bienMatch.getCriteriaName());
+        boolean hasCriteria = false;
+        if (Objects.nonNull(bienMatch.getValueMin())) {
+            surfaceCriteria.gte(bienMatch.getValueMin());
+            hasCriteria = true;
 
         }
-        if (hasSurface) {
+        if (Objects.nonNull(bienMatch.getValueMax())) {
+            surfaceCriteria.lte(bienMatch.getValueMax());
+            hasCriteria = true;
+
+        }
+        if (hasCriteria) {
             addCriteria(surfaceCriteria, query, matchOperations);
         }
 

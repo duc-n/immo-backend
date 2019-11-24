@@ -12,12 +12,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
+import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.repository.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -48,6 +53,21 @@ public class BienServiceImpl implements BienService {
     public Flux<Bien> findAll() {
         return bienRepository.findAll();
     }
+
+    @Override
+    public Flux<Bien> getBiensEtatCreation() {
+
+        List<AggregationOperation> matchOperations = new ArrayList<>();
+        // create lookup
+        LookupOperation lookupOperation = LookupOperation
+                .newLookup().from("userAccount").localField("consultantId").foreignField("username").as("consultants");
+
+        matchOperations.add(lookupOperation);
+
+
+        return null;
+    }
+
 
     @Override
     public Mono<Page<Bien>> searchCriteriaReactive(BienCritere bienCritere) {

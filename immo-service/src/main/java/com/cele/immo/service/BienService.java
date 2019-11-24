@@ -13,6 +13,8 @@ public interface BienService {
 
     Flux<Bien> findAll();
 
+    Flux<Bien> getBiensEtatCreation();
+
     Mono<Page<Bien>> searchCriteriaReactive(BienCritere bienCritere);
 
     Page<Bien> searchCriteria(BienCritere bienCritere);
