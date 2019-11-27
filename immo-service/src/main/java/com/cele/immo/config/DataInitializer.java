@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,16 +38,20 @@ public class DataInitializer {
     private final UserAccountRepository userAccountRepository;
     private final ReactiveGridFsTemplate gridFsTemplate;
     private final ResourceLoader resourceLoader;
+    private final PBKDF2Encoder passwordEncoder;
 
     public DataInitializer(BienRepository bienRepository, AcquereurRepository acquereurRepository,
                            ReactiveGridFsTemplate gridFsTemplate, ResourceLoader resourceLoader,
-                           ClientRepository clientRepository, UserAccountRepository userAccountRepository) {
+                           ClientRepository clientRepository, UserAccountRepository userAccountRepository,
+                           PBKDF2Encoder passwordEncoder
+    ) {
         this.bienRepository = bienRepository;
         this.acquereurRepository = acquereurRepository;
         this.gridFsTemplate = gridFsTemplate;
         this.resourceLoader = resourceLoader;
         this.clientRepository = clientRepository;
         this.userAccountRepository = userAccountRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @EventListener(value = ContextRefreshedEvent.class)
@@ -75,18 +80,19 @@ public class DataInitializer {
 
         });*/
 
-
         Mono<List<UserAccount>> users = this.userAccountRepository.deleteAll()
                 .thenMany(
                         Flux
-                                .range(0, 1)
+                                .range(0, 2)
                                 .flatMap(
                                         i -> this.userAccountRepository.save(
                                                 UserAccount.builder()
-                                                        .username(String.format("duc.nguyen@gmail.com", i))
+                                                        .username(i % 2 == 1 ? "user@gmail.com" : "admin@gmail.com")
+                                                        .password(passwordEncoder.encode(i % 2 == 1 ? "user" : "admin"))
                                                         .phoneNumber("0686955644")
                                                         .firstName("duc")
                                                         .lastName("nguyen")
+                                                        .roles(i % 2 == 1 ? Arrays.asList(Role.ROLE_USER) : Arrays.asList(Role.ROLE_ADMIN))
                                                         .active(Boolean.TRUE)
                                                         .build()
 
