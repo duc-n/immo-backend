@@ -36,6 +36,7 @@ public class BienController {
     }
 
     @PostMapping("/rechercherBien")
+    //@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public Page<Bien> rechercherBien(@RequestBody BienCritere bienCritere) {
         log.info("rechercherBien called. Bien critere : {}", bienCritere);
         return bienService.searchCriteria(bienCritere);
