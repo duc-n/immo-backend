@@ -1,7 +1,10 @@
 package com.cele.immo.service;
 
 import com.cele.immo.dto.BienCritere;
+import com.cele.immo.dto.BienDTO;
+import com.cele.immo.helper.BienMatchHelper;
 import com.cele.immo.model.bien.Bien;
+import com.cele.immo.model.bien.EtatBien;
 import com.cele.immo.repository.BienRepository;
 import com.cele.immo.repository.UserAccountRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -55,19 +59,28 @@ public class BienServiceImpl implements BienService {
     }
 
     @Override
-    public Flux<Bien> getBiensEtatCreation() {
-
+    public List<BienDTO> getBiensEtatCreation(String username) {
+        log.debug("getBiensEtatCreation BEGIN. Username={}", username);
         List<AggregationOperation> matchOperations = new ArrayList<>();
         // create lookup
         LookupOperation lookupOperation = LookupOperation
                 .newLookup().from("userAccount").localField("consultantId").foreignField("username").as("consultants");
 
+        Criteria consultantId = Criteria.where("consultantId").is(username);
+        Criteria etatCreation = Criteria.where("etat").is(EtatBien.CREATION);
+        matchOperations.add(Aggregation.match(consultantId));
+        matchOperations.add(Aggregation.match(etatCreation));
         matchOperations.add(lookupOperation);
 
+        matchOperations.add(BienMatchHelper.getProjectOperation());
 
-        return null;
+        Aggregation aggregation = Aggregation.newAggregation(matchOperations);
+        //Convert the aggregation result into a List
+        List<BienDTO> biens = mongoTemplate.aggregate(aggregation, Bien.class, BienDTO.class).getMappedResults();
+
+        log.debug("BienDTO result {}", biens.size());
+        return biens;
     }
-
 
     @Override
     public Mono<Page<Bien>> searchCriteriaReactive(BienCritere bienCritere) {

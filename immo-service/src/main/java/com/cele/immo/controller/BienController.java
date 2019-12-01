@@ -1,6 +1,7 @@
 package com.cele.immo.controller;
 
 import com.cele.immo.dto.BienCritere;
+import com.cele.immo.dto.BienDTO;
 import com.cele.immo.model.bien.Bien;
 import com.cele.immo.service.BienService;
 import lombok.extern.slf4j.Slf4j;
@@ -9,9 +10,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @RestController()
 @RequestMapping(value = "/bien")
@@ -31,8 +38,19 @@ public class BienController {
     }
 
     @GetMapping("/getBiensEtatCreation")
-    public Flux<Bien> getBiensEtatCreation() {
-        return this.bienService.getBiensEtatCreation();
+    public Mono<List<BienDTO>> getBiensEtatCreation(ServerWebExchange exchange) {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .map(Authentication::getPrincipal)
+                .cast(String.class)
+                //.log()
+                //.zipWith(exchange.getFormData())
+                //.doOnNext(tuple -> {
+                // based on some input parameters, amend the current user data to be returned
+                //})
+                //.map(Tuple2::getT1);
+                .flatMap(username -> Mono.just(bienService.getBiensEtatCreation(username)));
+
     }
 
     @PostMapping("/rechercherBien")

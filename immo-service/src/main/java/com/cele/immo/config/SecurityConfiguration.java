@@ -16,6 +16,11 @@ import reactor.core.publisher.Mono;
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 public class SecurityConfiguration {
+    private static final String ALLOWED_HEADERS = "x-requested-with, authorization, Content-Type, Authorization, credential, X-XSRF-TOKEN";
+    private static final String ALLOWED_METHODS = "GET, PUT, POST, DELETE, OPTIONS";
+    private static final String ALLOWED_Origin = "*";
+    private static final long MAX_AGE = 3600;
+
     @Autowired
     UserAccountRepository userAccountRepository;
 
@@ -25,6 +30,23 @@ public class SecurityConfiguration {
     @Autowired
     private SecurityContextRepository securityContextRepository;
 
+    /*
+    @Bean
+    CorsWebFilter corsWebFilter() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        //corsConfig.setAllowedOrigins(Arrays.asList(ALLOWED_Origin));
+        corsConfig.addAllowedOrigin(ALLOWED_Origin);
+        corsConfig.setMaxAge(MAX_AGE);
+        corsConfig.addAllowedMethod(ALLOWED_METHODS);
+        corsConfig.addAllowedHeader(ALLOWED_HEADERS);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+
+        return new CorsWebFilter(source);
+    }
+*/
     @Bean
     public SecurityWebFilterChain securitygWebFilterChain(ServerHttpSecurity http) {
         return http
@@ -32,13 +54,16 @@ public class SecurityConfiguration {
                 .authenticationEntryPoint((swe, e) -> {
                     return Mono.fromRunnable(() -> {
                         swe.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                        swe.getResponse().getHeaders().setAccessControlAllowOrigin("*");
                     });
                 }).accessDeniedHandler((swe, e) -> {
                     return Mono.fromRunnable(() -> {
                         swe.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                        swe.getResponse().getHeaders().setAccessControlAllowOrigin("*");
                     });
                 }).and()
                 .csrf().disable()
+                //.cors().disable()
                 .formLogin().disable()
                 .httpBasic().disable()
                 .authenticationManager(authenticationManager)

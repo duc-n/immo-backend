@@ -3,6 +3,7 @@ package com.cele.immo.service;
 import com.cele.immo.dto.BienCritere;
 import com.cele.immo.dto.BienDTO;
 import com.cele.immo.dto.BienMatch;
+import com.cele.immo.helper.BienMatchHelper;
 import com.cele.immo.model.UserAccount;
 import com.cele.immo.model.bien.Bien;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +14,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.*;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
+import org.springframework.data.mongodb.core.aggregation.LimitOperation;
+import org.springframework.data.mongodb.core.aggregation.SkipOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -24,9 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
-import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 @Slf4j
 @Service
@@ -70,18 +71,18 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
 
             Criteria idsConsultants = Criteria.where("consultantId").in(consultantsIds);
 
-            addCriteria(idsConsultants, countQuery, matchOperations);
+            BienMatchHelper.addCriteria(idsConsultants, countQuery, matchOperations);
         }
 
         // type de bien
         if (StringUtils.hasText(bienCritere.getTypeBien())) {
             Criteria typeBien = Criteria.where("detailBien.typeBien").is(bienCritere.getTypeBien());
-            addCriteria(typeBien, countQuery, matchOperations);
+            BienMatchHelper.addCriteria(typeBien, countQuery, matchOperations);
         }
 
         // popupStore opt
         if (BooleanUtils.isTrue(bienCritere.getPopupStore())) {
-            addCriteria(Criteria.where("detailBien.activites.popupStore").is(Boolean.TRUE), countQuery, matchOperations);
+            BienMatchHelper.addCriteria(Criteria.where("detailBien.activites.popupStore").is(Boolean.TRUE), countQuery, matchOperations);
         }
 
         //surface.surfaceTotale
@@ -90,21 +91,21 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
                 .valueMin(bienCritere.getSurfaceTotaleMin())
                 .valueMax(bienCritere.getSurfaceTotaleMax())
                 .build();
-        matchBetween(surfaceTotalMatch, countQuery, matchOperations);
+        BienMatchHelper.matchBetween(surfaceTotalMatch, countQuery, matchOperations);
 
         // adresse
         if (StringUtils.hasText(bienCritere.getAdresse())) {
             Criteria regexAdresse = Criteria.where("detailBien.adresseBien.adresse").regex(bienCritere.getAdresse(), "i");// i option for case insensitive.
-            addCriteria(regexAdresse, countQuery, matchOperations);
+            BienMatchHelper.addCriteria(regexAdresse, countQuery, matchOperations);
         }
 
         // codePostal
         if (StringUtils.hasText(bienCritere.getCodePostal())) {
             Criteria regexCodePostal = Criteria.where("detailBien.adresseBien.codePostal").regex(bienCritere.getCodePostal(), "i");// i option for case insensitive.
-            addCriteria(regexCodePostal, countQuery, matchOperations);
+            BienMatchHelper.addCriteria(regexCodePostal, countQuery, matchOperations);
         }
 
-        matchOperations.add(getProjectOperation());
+        matchOperations.add(BienMatchHelper.getProjectOperation());
 
         matchOperations.add(new SkipOperation(pageable.getPageNumber() * pageable.getPageSize()));
         matchOperations.add(new LimitOperation(pageable.getPageSize()));
@@ -122,36 +123,4 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
     }
 
 
-    private ProjectionOperation getProjectOperation() {
-        return project("id")
-                .and("detailBien.adresseBien.adresse").as("adresse")
-                .and("detailBien.adresseBien.codePostal").as("codePostal")
-                ;
-    }
-
-
-    private void matchBetween(BienMatch bienMatch, Query query, List<AggregationOperation> matchOperations) {
-
-        Criteria surfaceCriteria = where(bienMatch.getCriteriaName());
-        boolean hasCriteria = false;
-        if (Objects.nonNull(bienMatch.getValueMin())) {
-            surfaceCriteria.gte(bienMatch.getValueMin());
-            hasCriteria = true;
-
-        }
-        if (Objects.nonNull(bienMatch.getValueMax())) {
-            surfaceCriteria.lte(bienMatch.getValueMax());
-            hasCriteria = true;
-
-        }
-        if (hasCriteria) {
-            addCriteria(surfaceCriteria, query, matchOperations);
-        }
-
-    }
-
-    private void addCriteria(Criteria criteria, Query query, List<AggregationOperation> matchOperations) {
-        query.addCriteria(criteria);
-        matchOperations.add(Aggregation.match(criteria));
-    }
 }

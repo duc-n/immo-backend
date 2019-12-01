@@ -1,10 +1,13 @@
 package com.cele.immo.service;
 
 import com.cele.immo.dto.BienCritere;
+import com.cele.immo.dto.BienDTO;
 import com.cele.immo.model.bien.Bien;
 import org.springframework.data.domain.Page;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 public interface BienService {
     Mono<Bien> save(Bien bien);
@@ -13,7 +16,7 @@ public interface BienService {
 
     Flux<Bien> findAll();
 
-    Flux<Bien> getBiensEtatCreation();
+    List<BienDTO> getBiensEtatCreation(String username);
 
     Mono<Page<Bien>> searchCriteriaReactive(BienCritere bienCritere);
 
