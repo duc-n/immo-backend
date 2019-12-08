@@ -1,8 +1,8 @@
 package com.cele.immo.service;
 
 import com.cele.immo.dto.BienCritere;
-import com.cele.immo.dto.BienDTO;
 import com.cele.immo.dto.BienMatch;
+import com.cele.immo.dto.BienResult;
 import com.cele.immo.helper.BienMatchHelper;
 import com.cele.immo.model.UserAccount;
 import com.cele.immo.model.bien.Bien;
@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 @Service
 public class CustomBienRepositoryImpl implements CustomBienRepository {
 
-    @Autowired
     private final MongoTemplate mongoTemplate;
 
     @Autowired
@@ -59,7 +58,7 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
         // consultant name
         if (StringUtils.hasText(bienCritere.getConsultant())) {
             Query consultantNameQuery = new Query();
-            Criteria regexLastName = Criteria.where("lastName").regex(bienCritere.getConsultant(), "i");// i option for case insensitive.
+            Criteria regexLastName = Criteria.where("nom").regex(bienCritere.getConsultant(), "i");// i option for case insensitive.
             consultantNameQuery.addCriteria(regexLastName);
 
             List<UserAccount> consultants = mongoTemplate.find(consultantNameQuery, UserAccount.class, "userAccount");
@@ -113,7 +112,7 @@ public class CustomBienRepositoryImpl implements CustomBienRepository {
         Aggregation aggregation = Aggregation.newAggregation(matchOperations);
 
         //Convert the aggregation result into a List
-        List<BienDTO> biens = mongoTemplate.aggregate(aggregation, Bien.class, BienDTO.class).getMappedResults();
+        List<BienResult> biens = mongoTemplate.aggregate(aggregation, Bien.class, BienResult.class).getMappedResults();
 
         long total = mongoTemplate.count(countQuery, Bien.class);
         log.debug("Total bien result : {}", total);

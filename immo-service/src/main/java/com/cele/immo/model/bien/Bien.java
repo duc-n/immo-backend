@@ -23,6 +23,7 @@ public class Bien {
     @Indexed
     @NotEmpty
     private String consultantId;
+    private List<ConsultantAssocie> consultantsAssocies;
     private EtatBien etat;
     private DetailBien detailBien;
     private Mandat mandat;

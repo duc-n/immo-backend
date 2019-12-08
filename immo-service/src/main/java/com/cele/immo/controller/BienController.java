@@ -1,7 +1,7 @@
 package com.cele.immo.controller;
 
 import com.cele.immo.dto.BienCritere;
-import com.cele.immo.dto.BienDTO;
+import com.cele.immo.dto.BienResult;
 import com.cele.immo.model.bien.Bien;
 import com.cele.immo.service.BienService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +18,6 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 @RestController()
 @RequestMapping(value = "/bien")
 @Slf4j
@@ -33,12 +31,12 @@ public class BienController {
     }
 
     @GetMapping("{id}")
-    public Mono<Bien> getBienById(@PathVariable String id) {
-        return this.bienService.findById(id);
+    public Flux<Bien> getBienById(@PathVariable String id) {
+        return this.bienService.findByIdExcludePassword(id);
     }
 
     @GetMapping("/getBiensEtatCreation")
-    public Mono<List<BienDTO>> getBiensEtatCreation(ServerWebExchange exchange) {
+    public Mono<Page<BienResult>> getBiensEtatCreation(ServerWebExchange exchange) {
         return ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
                 .map(Authentication::getPrincipal)
@@ -60,15 +58,16 @@ public class BienController {
         return bienService.searchCriteria(bienCritere);
     }
 
-    @PostMapping()
+    @PutMapping()
     @ResponseStatus(HttpStatus.OK)
     public Mono<Bien> updateBien(@RequestBody Bien bien) {
+        log.debug("Update bien");
         return bienService.save(bien);
     }
 
-    @PutMapping("/{id}")
-    public Mono<ResponseEntity<Bien>> updateBienById(@PathVariable(value = "id") String id, @RequestBody Bien bien) {
-        return bienService.findById(id)
+    @PostMapping
+    public Mono<ResponseEntity<Bien>> updateBienV2(@RequestBody Bien bien) {
+        return bienService.findById(bien.getId())
                 .flatMap(existingBien -> {
                     existingBien.setMandat(bien.getMandat());
                     return bienService.save(existingBien);

@@ -1,13 +1,25 @@
 package com.cele.immo.dto;
 
-import com.cele.immo.model.bien.EtatBien;
-import lombok.Data;
+import com.cele.immo.model.Photo;
+import com.cele.immo.model.Video;
+import com.cele.immo.model.bien.*;
 
-@Data
+import java.util.List;
+
 public class BienDTO {
     private String id;
+    private String consultantId;
+    private ConsultantDTO consultant;
+    private List<ConsultantAssocieDTO> consultantsAssocies;
     private EtatBien etat;
-    private String adresse;
-    private String codePostal;
-
+    private DetailBien detailBien;
+    private Mandat mandat;
+    private Bail bail;
+    private ConditionsFinancieres conditionsFinancieres;
+    private Visite visite;
+    private Surface surface;
+    private Descriptif descriptif;
+    private List<Photo> photos;
+    private List<Video> videos;
+    private Communication communication;
 }

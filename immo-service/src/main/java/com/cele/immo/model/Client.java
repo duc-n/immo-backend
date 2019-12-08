@@ -35,5 +35,6 @@ public class Client {
     private Boolean alertEmail;
 
     //@CascadeSave
+    //@DBRef
     private List<String> consultantIds;
 }

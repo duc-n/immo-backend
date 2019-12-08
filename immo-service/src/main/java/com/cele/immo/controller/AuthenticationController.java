@@ -4,6 +4,7 @@ import com.cele.immo.config.JWTUtil;
 import com.cele.immo.config.PBKDF2Encoder;
 import com.cele.immo.dto.AuthRequest;
 import com.cele.immo.dto.AuthResponse;
+import com.cele.immo.dto.UserDTO;
 import com.cele.immo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class AuthenticationController {
 
         return userService.findByUsername(ar.getUsername()).map((userDetails) -> {
             if (passwordEncoder.encode(ar.getPassword()).equals(userDetails.getPassword())) {
-                return ResponseEntity.ok(new AuthResponse(jwtUtil.generateToken(userDetails)));
+                return ResponseEntity.ok(new AuthResponse(jwtUtil.generateToken(userDetails), new UserDTO(userDetails.getUsername(), userDetails.getNom(), userDetails.getPrenom())));
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }

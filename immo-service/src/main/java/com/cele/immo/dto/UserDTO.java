@@ -9,7 +9,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class AuthResponse {
-    private String token;
-    private UserDTO user;
+public class UserDTO {
+    private String username;
+    private String nom;
+    private String prenom;
 }

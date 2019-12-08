@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 public interface UserAccountRepository extends ReactiveMongoRepository<UserAccount, String> {
     Mono<UserAccount> findByUsername(String username);
 
-    Flux<UserAccount> findByLastNameLike(String lastName);
+    Flux<UserAccount> findByNomLike(String nom);
 
-    Flux<UserAccount> findByLastName(String lastName);
+    Flux<UserAccount> findByNom(String nom);
 }

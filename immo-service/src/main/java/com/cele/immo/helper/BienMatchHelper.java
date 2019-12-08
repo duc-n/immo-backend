@@ -22,6 +22,10 @@ public class BienMatchHelper {
                 ;
     }
 
+    public static ProjectionOperation excludePasswordProjectOperation() {
+        return project().andExclude("consultant.password");
+    }
+
     public static void matchBetween(BienMatch bienMatch, Query query, List<AggregationOperation> matchOperations) {
 
         Criteria surfaceCriteria = where(bienMatch.getCriteriaName());

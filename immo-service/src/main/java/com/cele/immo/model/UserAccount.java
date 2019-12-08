@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,17 +22,14 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Document
 public class UserAccount implements UserDetails {
-
-    @Id
     private String id;
     @Email
     @Indexed(unique = true)
     private String username;
     private String password;
-    private String firstName;
-    private String lastName;
-    private String phoneNumber;
-    private String idnp;
+    private String nom;
+    private String prenom;
+    private String telephone;
 
     @Builder.Default()
     private boolean active = true;
@@ -77,6 +73,6 @@ public class UserAccount implements UserDetails {
     }
 
     public String getName() {
-        return firstName + " " + lastName;
+        return prenom + " " + nom;
     }
 }

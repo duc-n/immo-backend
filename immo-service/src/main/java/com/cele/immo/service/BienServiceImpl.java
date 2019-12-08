@@ -1,7 +1,7 @@
 package com.cele.immo.service;
 
 import com.cele.immo.dto.BienCritere;
-import com.cele.immo.dto.BienDTO;
+import com.cele.immo.dto.BienResult;
 import com.cele.immo.helper.BienMatchHelper;
 import com.cele.immo.model.bien.Bien;
 import com.cele.immo.model.bien.EtatBien;
@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -54,13 +55,41 @@ public class BienServiceImpl implements BienService {
     }
 
     @Override
+    public Flux<Bien> findByIdExcludePassword(String id) {
+        List<AggregationOperation> matchOperations = new ArrayList<>();
+        Criteria idCriteria = Criteria.where("id").is(id);
+        matchOperations.add(Aggregation.match(idCriteria));
+
+        //matchOperations.add(BienMatchHelper.excludePasswordProjectOperation());
+
+        // create lookup
+        LookupOperation consultantLookupOperation = LookupOperation
+                .newLookup().from("userAccount").localField("consultantId").foreignField("username").as("consultant");
+
+        LookupOperation consultantsAssocieLookupOperation = LookupOperation
+                .newLookup().from("userAccount").localField("consultantsAssocies.consultantId").foreignField("username").as("consultant");
+
+        //matchOperations.add(consultantLookupOperation);
+        //matchOperations.add(consultantsAssocieLookupOperation);
+
+        Aggregation aggregation = Aggregation.newAggregation(matchOperations);
+
+
+        return reactiveMongoTemplate.aggregate(aggregation, Bien.class, Bien.class);
+
+
+    }
+
+    @Override
     public Flux<Bien> findAll() {
         return bienRepository.findAll();
     }
 
     @Override
-    public List<BienDTO> getBiensEtatCreation(String username) {
+    public Page<BienResult> getBiensEtatCreation(String username) {
         log.debug("getBiensEtatCreation BEGIN. Username={}", username);
+
+        Pageable pageable = PageRequest.of(0, 10);
         List<AggregationOperation> matchOperations = new ArrayList<>();
         // create lookup
         LookupOperation lookupOperation = LookupOperation
@@ -73,13 +102,12 @@ public class BienServiceImpl implements BienService {
         matchOperations.add(lookupOperation);
 
         matchOperations.add(BienMatchHelper.getProjectOperation());
-
         Aggregation aggregation = Aggregation.newAggregation(matchOperations);
         //Convert the aggregation result into a List
-        List<BienDTO> biens = mongoTemplate.aggregate(aggregation, Bien.class, BienDTO.class).getMappedResults();
+        List<BienResult> biens = mongoTemplate.aggregate(aggregation, Bien.class, BienResult.class).getMappedResults();
 
         log.debug("BienDTO result {}", biens.size());
-        return biens;
+        return new PageImpl(biens, pageable, biens.size());
     }
 
     @Override
