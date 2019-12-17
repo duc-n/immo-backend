@@ -18,6 +18,10 @@ import java.util.List;
 @Builder
 @Document
 public class Bien {
+    @CreatedDate
+    public LocalDateTime createdDate;
+    @LastModifiedDate
+    public LocalDateTime modifiedDate;
     @Id
     private String id;
     @Indexed
@@ -35,8 +39,4 @@ public class Bien {
     private List<Photo> photos;
     private List<Video> videos;
     private Communication communication;
-    @CreatedDate
-    public LocalDateTime createdDate;
-    @LastModifiedDate
-    public LocalDateTime modifiedDate;
 }

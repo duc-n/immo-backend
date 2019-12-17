@@ -1,6 +1,7 @@
 package com.cele.immo.controller;
 
 import com.cele.immo.dto.BienCritere;
+import com.cele.immo.dto.BienDTO;
 import com.cele.immo.dto.BienResult;
 import com.cele.immo.model.bien.Bien;
 import com.cele.immo.service.BienService;
@@ -31,7 +32,7 @@ public class BienController {
     }
 
     @GetMapping("{id}")
-    public Flux<Bien> getBienById(@PathVariable String id) {
+    public Mono<BienDTO> getBienById(@PathVariable String id) {
         return this.bienService.findByIdExcludePassword(id);
     }
 
@@ -49,6 +50,11 @@ public class BienController {
                 //.map(Tuple2::getT1);
                 .flatMap(username -> Mono.just(bienService.getBiensEtatCreation(username)));
 
+    }
+
+    @GetMapping("/create")
+    public Mono<Bien> createBien(ServerWebExchange exchange) {
+        return null;
     }
 
     @PostMapping("/rechercherBien")

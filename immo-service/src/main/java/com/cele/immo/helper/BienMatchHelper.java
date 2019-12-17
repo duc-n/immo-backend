@@ -1,9 +1,8 @@
 package com.cele.immo.helper;
 
 import com.cele.immo.dto.BienMatch;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
-import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
+import org.bson.Document;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -23,7 +22,21 @@ public class BienMatchHelper {
     }
 
     public static ProjectionOperation excludePasswordProjectOperation() {
-        return project().andExclude("consultant.password");
+        return project("detailBien", "conditionsFinancieres", "bail", "visite", "consultant", "descriptif", "communication", "etat", "surface", "mandat", "photos")
+                //andExclude("consultant.password")
+                .and(
+                        VariableOperators.mapItemsOf("consultants").as("rt")
+                                .andApply(
+                                        new AggregationExpression() {
+                                            @Override
+                                            public Document toDocument(AggregationOperationContext aggregationOperationContext) {
+                                                return new Document("id", "$$rt.id").append("username", "$$rt.username")
+                                                        .append("nom", "$$rt.nom");
+                                            }
+                                        }
+                                )
+                ).as("consultantsDTO");
+
     }
 
     public static void matchBetween(BienMatch bienMatch, Query query, List<AggregationOperation> matchOperations) {

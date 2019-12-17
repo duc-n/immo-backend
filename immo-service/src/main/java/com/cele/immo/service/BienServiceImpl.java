@@ -1,6 +1,7 @@
 package com.cele.immo.service;
 
 import com.cele.immo.dto.BienCritere;
+import com.cele.immo.dto.BienDTO;
 import com.cele.immo.dto.BienResult;
 import com.cele.immo.helper.BienMatchHelper;
 import com.cele.immo.model.bien.Bien;
@@ -50,12 +51,17 @@ public class BienServiceImpl implements BienService {
     }
 
     @Override
+    public Mono<Bien> createBien() {
+        return null;
+    }
+
+    @Override
     public Mono<Bien> findById(String id) {
         return bienRepository.findById(id);
     }
 
     @Override
-    public Flux<Bien> findByIdExcludePassword(String id) {
+    public Mono<BienDTO> findByIdExcludePassword(String id) {
         List<AggregationOperation> matchOperations = new ArrayList<>();
         Criteria idCriteria = Criteria.where("id").is(id);
         matchOperations.add(Aggregation.match(idCriteria));
@@ -67,15 +73,15 @@ public class BienServiceImpl implements BienService {
                 .newLookup().from("userAccount").localField("consultantId").foreignField("username").as("consultant");
 
         LookupOperation consultantsAssocieLookupOperation = LookupOperation
-                .newLookup().from("userAccount").localField("consultantsAssocies.consultantId").foreignField("username").as("consultant");
+                .newLookup().from("userAccount").localField("consultantsAssocies.consultantId").foreignField("username").as("consultants");
 
-        //matchOperations.add(consultantLookupOperation);
-        //matchOperations.add(consultantsAssocieLookupOperation);
+        matchOperations.add(consultantLookupOperation);
+        matchOperations.add(consultantsAssocieLookupOperation);
 
+        matchOperations.add(BienMatchHelper.excludePasswordProjectOperation());
         Aggregation aggregation = Aggregation.newAggregation(matchOperations);
 
-
-        return reactiveMongoTemplate.aggregate(aggregation, Bien.class, Bien.class);
+        return reactiveMongoTemplate.aggregate(aggregation, Bien.class, BienDTO.class).next();
 
 
     }
@@ -93,7 +99,7 @@ public class BienServiceImpl implements BienService {
         List<AggregationOperation> matchOperations = new ArrayList<>();
         // create lookup
         LookupOperation lookupOperation = LookupOperation
-                .newLookup().from("userAccount").localField("consultantId").foreignField("username").as("consultants");
+                .newLookup().from("userAccount").localField("consultantId").foreignField("username").as("consultant");
 
         Criteria consultantId = Criteria.where("consultantId").is(username);
         Criteria etatCreation = Criteria.where("etat").is(EtatBien.CREATION);
