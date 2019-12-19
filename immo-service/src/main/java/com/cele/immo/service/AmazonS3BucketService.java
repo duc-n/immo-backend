@@ -6,6 +6,6 @@ import reactor.core.publisher.Mono;
 public interface AmazonS3BucketService {
     public Mono<String> uploadFile(FilePart filePart);
 
-    String deleteFile(String fileName);
+    Mono<Void> deleteFile(String fileName);
 
 }

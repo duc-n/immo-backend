@@ -55,9 +55,9 @@ public class AmazonS3BucketServiceImpl implements AmazonS3BucketService {
     }
 
     @Override
-    public String deleteFile(String fileName) {
-        amazonS3.deleteObject(new DeleteObjectRequest(bucketName, fileName));
-        return "Deletion Successful";
+    public Mono<Void> deleteFile(String fileName) {
+        amazonS3.deleteObject(new DeleteObjectRequest(bucketName, "14257/47857/" + fileName));
+        return Mono.empty();
     }
 
 
