@@ -35,17 +35,18 @@ public class AmazonS3BucketServiceImpl implements AmazonS3BucketService {
     }
 
     @Override
-    public Mono<String> uploadFile(FilePart filePart) {
+    public Mono<String> uploadFile(String userName, String bienId, FilePart filePart) {
+        log.debug("UserName: {}", userName);
 
         return DataBufferUtils.join(filePart.content())
                 .map(dataBuffer -> {
                     String filename = filePart.filename();
-                    log.debug("filename : {}", filename);
-                    log.debug("Data length : {}", dataBuffer.capacity());
+                    String key = userName + "/" + bienId + "/" + filename;
+                    log.debug("UploadFile key : {} - Data Length :{} - UserName :{}", key, dataBuffer.capacity());
 
                     ObjectMetadata metadata = new ObjectMetadata();
                     metadata.setContentLength(dataBuffer.capacity());
-                    PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, "14257/47857/" + filename, dataBuffer.asInputStream(), metadata);
+                    PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, dataBuffer.asInputStream(), metadata);
 
                     amazonS3.putObject(putObjectRequest
                             .withCannedAcl(CannedAccessControlList.PublicRead));
