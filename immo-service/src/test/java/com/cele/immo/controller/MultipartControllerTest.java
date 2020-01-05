@@ -3,7 +3,6 @@ package com.cele.immo.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.io.ClassPathResource;
@@ -22,10 +21,9 @@ import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Slf4j
 public class MultipartControllerTest {
+    WebTestClient client;
     @LocalServerPort
     private int port;
-
-    WebTestClient client;
 
     @BeforeEach
     public void setup() {
@@ -40,7 +38,7 @@ public class MultipartControllerTest {
         return builder.build();
     }
 
-    @Test
+    //@Test
     public void testUpload() throws IOException {
         byte[] result = client
                 .post()

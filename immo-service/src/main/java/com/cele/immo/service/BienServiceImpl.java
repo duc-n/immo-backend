@@ -10,6 +10,7 @@ import com.cele.immo.repository.BienRepository;
 import com.cele.immo.repository.UserAccountRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -17,9 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
-import org.springframework.data.mongodb.core.aggregation.LookupOperation;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.repository.support.PageableExecutionUtils;
@@ -72,14 +71,54 @@ public class BienServiceImpl implements BienService {
         LookupOperation consultantLookupOperation = LookupOperation
                 .newLookup().from("userAccount").localField("consultantId").foreignField("username").as("consultant");
 
+        UnwindOperation consultantsAssociesUnwindOperation = Aggregation.unwind("consultantsAssocies");
+
         LookupOperation consultantsAssocieLookupOperation = LookupOperation
-                .newLookup().from("userAccount").localField("consultantsAssocies.consultantId").foreignField("username").as("consultants");
+                .newLookup().from("userAccount").localField("consultantsAssocies.consultantId").foreignField("username").as("consultantsAssocies.consultant");
+
+        GroupOperation groupOperation = Aggregation.group("id")
+                .push("consultantsAssocies").as("consultantsAssocies")
+                .first("consultant").as("consultant")
+                .first("etat").as("etat")
+                .first("detailBien").as("detailBien")
+                .first("mandat").as("mandat")
+                .first("bail").as("bail")
+                .first("conditionsFinancieres").as("conditionsFinancieres")
+                .first("visite").as("visite")
+                .first("surface").as("surface")
+                .first("descriptif").as("descriptif")
+                .first("photos").as("photos")
+                .first("videos").as("videos")
+                .first("communication").as("communication");
+
 
         matchOperations.add(consultantLookupOperation);
+
+        matchOperations.add(consultantsAssociesUnwindOperation);
+
         matchOperations.add(consultantsAssocieLookupOperation);
 
-        matchOperations.add(BienMatchHelper.excludePasswordProjectOperation());
+        //matchOperations.add(consultantsUnwindOperation);
+
+
+        matchOperations.add(groupOperation);
+
+        AggregationOperation addCommissionField = new AggregationOperation() {
+            @Override
+            public Document toDocument(AggregationOperationContext aoc) {
+                return new Document("$addFields", new Document("metaId.ref.name", "$simple.name"));
+            }
+        };
+
+
+        //matchOperations.add(BienMatchHelper.excludePasswordProjectOperation());
         Aggregation aggregation = Aggregation.newAggregation(matchOperations);
+
+        AggregationResults<Document> result = mongoTemplate.aggregate(aggregation, Bien.class, Document.class);
+
+        List<Document> documents = result.getMappedResults();
+        documents.forEach(document -> log.debug("Bien result {}", document));
+
 
         return reactiveMongoTemplate.aggregate(aggregation, Bien.class, BienDTO.class).next();
 
