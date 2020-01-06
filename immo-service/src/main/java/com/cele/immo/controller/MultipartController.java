@@ -4,6 +4,7 @@ import com.cele.immo.dto.FileName;
 import com.cele.immo.function.TriFunction;
 import com.cele.immo.model.UserAccount;
 import com.cele.immo.service.AmazonS3BucketService;
+import com.cele.immo.service.BienService;
 import com.google.common.collect.ImmutableMap;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -35,6 +36,9 @@ import static org.springframework.http.ResponseEntity.ok;
 public class MultipartController {
 
     private final ReactiveGridFsTemplate gridFsTemplate;
+
+    @Autowired
+    BienService bienService;
 
     @Autowired
     AmazonS3BucketService amazonS3BucketService;
@@ -75,7 +79,8 @@ public class MultipartController {
 
         //Mono zip() => create tuble2, 3, 4....
         return Mono.zip(exchange.getPrincipal().map(Principal::getName).switchIfEmpty(Mono.empty()), Mono.just(bienId), fileParts)
-                .flatMap(triFunctionOnTuple(amazonS3BucketService::uploadFile));
+                .flatMap(triFunctionOnTuple(amazonS3BucketService::uploadFile))// return Mono<String>
+                .flatMap(bienService::savePhoto);
 
         // return fileParts
         //       .flatMap(part -> amazonS3BucketService.uploadFile(part))

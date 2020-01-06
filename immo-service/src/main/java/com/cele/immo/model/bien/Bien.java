@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -43,4 +44,25 @@ public class Bien {
     private List<Photo> photos;
     private List<Video> videos;
     private Communication communication;
+
+    public List<Photo> getPhotos() {
+        if (this.photos == null) {
+            this.photos = new ArrayList<>();
+        }
+        return this.photos;
+    }
+
+    public List<Video> getVideos() {
+        if (this.videos == null) {
+            this.videos = new ArrayList<>();
+        }
+        return this.videos;
+    }
+
+    public List<ConsultantAssocie> getConsultantsAssocies() {
+        if (this.consultantsAssocies == null) {
+            this.consultantsAssocies = new ArrayList<>();
+        }
+        return this.consultantsAssocies;
+    }
 }

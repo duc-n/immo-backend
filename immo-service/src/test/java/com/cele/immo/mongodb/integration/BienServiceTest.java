@@ -206,7 +206,7 @@ public class BienServiceTest {
                                 .interphone("94344")
                                 .build()
                         )
-                        .photos(Lists.newArrayList(Photo.builder().title("Image")
+                        .photos(Lists.newArrayList(Photo.builder().url("Image")
                                 //.image(new Binary(BsonBinarySubType.BINARY, inputByte))
                                 .build()
                         ))

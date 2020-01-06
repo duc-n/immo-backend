@@ -3,7 +3,9 @@ package com.cele.immo.service;
 import com.cele.immo.dto.BienCritere;
 import com.cele.immo.dto.BienDTO;
 import com.cele.immo.dto.BienResult;
+import com.cele.immo.dto.S3FileDescription;
 import com.cele.immo.helper.BienMatchHelper;
+import com.cele.immo.model.Photo;
 import com.cele.immo.model.bien.Bien;
 import com.cele.immo.model.bien.EtatBien;
 import com.cele.immo.repository.BienRepository;
@@ -180,6 +182,17 @@ public class BienServiceImpl implements BienService {
     public Page<Bien> searchCriteria(BienCritere bienCritere) {
 
         return bienRepository.searchBienCriteria(bienCritere);
+    }
+
+    @Override
+    public Mono<String> savePhoto(S3FileDescription s3FileDescription) {
+        return this.findById(s3FileDescription.getBienId()).flatMap(bien -> {
+            bien.getPhotos().add(Photo.builder()
+                    .key(s3FileDescription.getKey())
+                    .url(s3FileDescription.getUrl()).build());
+            log.debug("Save photo : {}", s3FileDescription.getUrl());
+            return this.save(bien).then(Mono.just(s3FileDescription.getUrl()));
+        });
     }
 
 }

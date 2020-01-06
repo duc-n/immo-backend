@@ -288,10 +288,12 @@ public class DataInitializer {
                                                                 .interphone("94344")
                                                                 .build()
                                                         )
-                                                        .photos(Lists.newArrayList(Photo.builder().title("Image")
+                                                        /*
+                                                        .photos(Lists.newArrayList(Photo.builder()
+                                                                .url("https://cele-immo-sandbox.s3.eu-west-2.amazonaws.com/admin%40gmail.com/5dffde8ed5952a28235b28be/memoire1.png")
                                                                 //.image(new Binary(BsonBinarySubType.BINARY, inputByte))
                                                                 .build()
-                                                        ))
+                                                        ))*/
                                                         .build()
                                         )
                                 )
