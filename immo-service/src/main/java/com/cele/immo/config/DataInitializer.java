@@ -11,6 +11,7 @@ import com.cele.immo.repository.ClientRepository;
 import com.cele.immo.repository.UserAccountRepository;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ResourceLoader;
@@ -32,6 +33,7 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 @Component
 @Slf4j
 public class DataInitializer {
+    @Autowired
     private final BienRepository bienRepository;
     private final ClientRepository clientRepository;
     private final AcquereurRepository acquereurRepository;
@@ -187,8 +189,10 @@ public class DataInitializer {
                                         i -> this.bienRepository.save(
                                                 Bien.builder()
                                                         .consultantId("admin@gmail.com")
+                                                        .consultant(userList.get(1))
                                                         .consultantsAssocies(Lists.newArrayList(ConsultantAssocie.builder()
                                                                 .consultantId("user@gmail.com")
+                                                                .consultant(userList.get(0))
                                                                 .commission(25)
                                                                 .build()))
                                                         .etat(i % 2 == 1 ? EtatBien.CREATION : EtatBien.ACTIVE)

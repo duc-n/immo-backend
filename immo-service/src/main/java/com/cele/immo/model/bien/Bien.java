@@ -1,6 +1,7 @@
 package com.cele.immo.model.bien;
 
 import com.cele.immo.model.Photo;
+import com.cele.immo.model.UserAccount;
 import com.cele.immo.model.Video;
 import lombok.Builder;
 import lombok.Data;
@@ -8,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotEmpty;
@@ -27,6 +29,8 @@ public class Bien {
     @Indexed
     @NotEmpty
     private String consultantId;
+    @DBRef
+    private UserAccount consultant;
     private List<ConsultantAssocie> consultantsAssocies;
     private EtatBien etat;
     private DetailBien detailBien;

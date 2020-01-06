@@ -26,6 +26,7 @@ import reactor.test.StepVerifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.BDDAssertions.then;
@@ -77,15 +78,38 @@ public class BienServiceTest {
     @Test
     public void givenBienObject_whenFindById_thenReturnBienObject() {
 
+        Mono<List<UserAccount>> users = this.userAccountRepository.deleteAll()
+                .thenMany(
+                        Flux
+                                .range(0, 2)
+                                .flatMap(
+                                        i -> this.userAccountRepository.save(
+                                                UserAccount.builder()
+                                                        .username(i % 2 == 1 ? "user@gmail.com" : "admin@gmail.com")
+                                                        .password(passwordEncoder.encode(i % 2 == 1 ? "user" : "admin"))
+                                                        .telephone("0686955644")
+                                                        .prenom("duc")
+                                                        .nom("nguyen")
+                                                        .roles(i % 2 == 1 ? Arrays.asList(Role.ROLE_USER) : Arrays.asList(Role.ROLE_ADMIN))
+                                                        .active(Boolean.TRUE)
+                                                        .build()
+
+                                        )
+                                )).collectList();
+
+        List<UserAccount> userList = users.block();
+
         Mono<Bien> bienMono = this.bienRepository.save(
                 Bien.builder()
                         .consultantId("admin@gmail.com")
                         .consultantsAssocies(Lists.newArrayList(ConsultantAssocie.builder()
                                         .consultantId("user@gmail.com")
+                                        .consultant(userList.get(0))
                                         .commission(25)
                                         .build(),
                                 ConsultantAssocie.builder()
                                         .consultantId("admin@gmail.com")
+                                        .consultant(userList.get(1))
                                         .commission(30)
                                         .build())
                         )
@@ -192,6 +216,11 @@ public class BienServiceTest {
         Mono<BienDTO> setup = bienMono.flatMap(bien -> bienService.findByIdExcludePassword(bien.getId()));
         StepVerifier
                 .create(setup)
+                .expectNextMatches(resource -> {
+                    log.debug("Resource result :{}", resource);
+                    then(resource.getEtat()).isEqualTo(EtatBien.CREATION);
+                    return true;
+                })
                 .verifyComplete();
     }
 

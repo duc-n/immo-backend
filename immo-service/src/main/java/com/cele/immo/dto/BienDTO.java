@@ -16,10 +16,7 @@ public class BienDTO implements Serializable {
     private String id;
     private String consultantId;
     private UserAccount consultant;
-    private List<ConsultantAssocie> consultantsAssocies;
-    private List<UserAccount> consultants;
-
-    private List<ConsultantDTO> consultantsDTO;
+    private List<ConsultantAssocieDTO> consultantsAssocies;
     private EtatBien etat;
     private DetailBien detailBien;
     private Mandat mandat;
