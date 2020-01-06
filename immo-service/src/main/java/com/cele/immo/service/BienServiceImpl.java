@@ -12,7 +12,6 @@ import com.cele.immo.repository.BienRepository;
 import com.cele.immo.repository.UserAccountRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
-import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -22,7 +21,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.LookupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -115,9 +113,10 @@ public class BienServiceImpl implements BienService {
         //matchOperations.add(BienMatchHelper.excludePasswordProjectOperation());
         Aggregation aggregation = Aggregation.newAggregation(matchOperations);
 
-        AggregationResults<Document> result = mongoTemplate.aggregate(aggregation, Bien.class, Document.class);
-        List<Document> documents = result.getMappedResults();
-        documents.forEach(document -> log.debug("Bien result {}", document));
+        // Used to test
+        //AggregationResults<Document> result = mongoTemplate.aggregate(aggregation, Bien.class, Document.class);
+        //List<Document> documents = result.getMappedResults();
+        //documents.forEach(document -> log.debug("Bien result {}", document));
 
         List<BienDTO> documents1 = mongoTemplate.aggregate(aggregation, Bien.class, BienDTO.class).getMappedResults();
         documents1.forEach(document -> log.debug("Bien1 result {}", document));

@@ -3,6 +3,7 @@ package com.cele.immo.controller;
 import com.cele.immo.dto.BienCritere;
 import com.cele.immo.dto.BienDTO;
 import com.cele.immo.dto.BienResult;
+import com.cele.immo.mappers.BienMapper;
 import com.cele.immo.model.bien.Bien;
 import com.cele.immo.service.BienService;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +54,7 @@ public class BienController {
     }
 
     @GetMapping("/create")
-    public Mono<Bien> createBien(ServerWebExchange exchange) {
+    public Mono<BienDTO> createBien(ServerWebExchange exchange) {
         return null;
     }
 
@@ -66,9 +67,13 @@ public class BienController {
 
     @PutMapping()
     @ResponseStatus(HttpStatus.OK)
-    public Mono<Bien> updateBien(@RequestBody Bien bien) {
+    public Mono<ResponseEntity<?>> updateBien(@RequestBody BienDTO bienDTO) {
         log.debug("Update bien");
-        return bienService.save(bien);
+
+        return bienService.findById(bienDTO.getId()).flatMap(bien -> {
+            BienMapper.INSTANCE.copyToBien(bienDTO, bien);
+            return bienService.save(bien);
+        }).thenReturn(ResponseEntity.ok(bienDTO));
     }
 
     @PostMapping
