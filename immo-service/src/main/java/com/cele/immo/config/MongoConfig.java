@@ -20,32 +20,6 @@ public class MongoConfig {
         return new ReactiveGridFsTemplate(reactiveMongoDbFactory, mappingMongoConverter);
     }
 
-    @Autowired
-    public void setMongoConverter(MappingMongoConverter mongoConverter) {
-        // remove the "_class" : "com.cele.Bien"
-        /*
-        mongoConverter.setTypeMapper(new DefaultMongoTypeMapper(null));
-
-        List<Object> customConverters = new ArrayList<Object>();
-        customConverters.add(new ConsultantDTOReaderConverter());
-        mongoConverter.setCustomConversions(new MongoCustomConversions(customConverters));
-        mongoConverter.afterPropertiesSet();*/
-    }
-
-/*
-    @Bean
-    public MongoDbFactory mongoDbFactory() {
-        return new SimpleMongoDbFactory(new MongoClientURI(env.getProperty("spring.data.mongodb.uri")));
-    }
-
-    @Bean
-    public MongoTemplate mongoTemplate() {
-        MongoTemplate mongoTemplate = new MongoTemplate(mongoDbFactory());
-
-        return mongoTemplate;
-
-    }
-*/
     /*@Bean
     public CascadeSaveMongoEventListener userCascadingMongoEventListener() {
         return new CascadeSaveMongoEventListener();
