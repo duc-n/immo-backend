@@ -20,6 +20,9 @@ public interface BienMapper {
     BienDTO toBienDTO(Bien bien);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "etat", ignore = true)
+    @Mapping(target = "consultantId", ignore = true)
+    @Mapping(target = "consultant", ignore = true)
     void copyToBien(BienDTO bienDTO, @MappingTarget Bien entity);
 
 }
