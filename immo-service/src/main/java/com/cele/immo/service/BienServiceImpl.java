@@ -3,7 +3,9 @@ package com.cele.immo.service;
 import com.cele.immo.dto.BienCritere;
 import com.cele.immo.dto.BienDTO;
 import com.cele.immo.dto.BienResult;
+import com.cele.immo.dto.S3FileDescription;
 import com.cele.immo.helper.BienMatchHelper;
+import com.cele.immo.model.Photo;
 import com.cele.immo.model.bien.Bien;
 import com.cele.immo.model.bien.EtatBien;
 import com.cele.immo.repository.BienRepository;
@@ -72,14 +74,52 @@ public class BienServiceImpl implements BienService {
         LookupOperation consultantLookupOperation = LookupOperation
                 .newLookup().from("userAccount").localField("consultantId").foreignField("username").as("consultant");
 
+        // UnwindOperation consultantsAssociesUnwindOperation = Aggregation.unwind("consultantsAssocies");
+
+        /*
+
         LookupOperation consultantsAssocieLookupOperation = LookupOperation
-                .newLookup().from("userAccount").localField("consultantsAssocies.consultantId").foreignField("username").as("consultants");
+                .newLookup().from("userAccount").localField("consultantsAssocies.consultantId").foreignField("username").as("consultantsAssocies.consultant");
+
+        GroupOperation groupOperation = Aggregation.group("id")
+                .push("consultantsAssocies").as("consultantsAssocies")
+                .first("consultant").as("consultant")
+                .first("etat").as("etat")
+                .first("detailBien").as("detailBien")
+                .first("mandat").as("mandat")
+                .first("bail").as("bail")
+                .first("conditionsFinancieres").as("conditionsFinancieres")
+                .first("visite").as("visite")
+                .first("surface").as("surface")
+                .first("descriptif").as("descriptif")
+                .first("photos").as("photos")
+                .first("videos").as("videos")
+                .first("communication").as("communication");
+
+        matchOperations.add(consultantsAssociesUnwindOperation);
+
+        matchOperations.add(consultantsAssocieLookupOperation);
+         */
 
         matchOperations.add(consultantLookupOperation);
-        matchOperations.add(consultantsAssocieLookupOperation);
 
-        matchOperations.add(BienMatchHelper.excludePasswordProjectOperation());
+
+        //matchOperations.add(consultantsUnwindOperation);
+
+
+        //matchOperations.add(groupOperation);
+
+
+        //matchOperations.add(BienMatchHelper.excludePasswordProjectOperation());
         Aggregation aggregation = Aggregation.newAggregation(matchOperations);
+
+        // Used to test
+        //AggregationResults<Document> result = mongoTemplate.aggregate(aggregation, Bien.class, Document.class);
+        //List<Document> documents = result.getMappedResults();
+        //documents.forEach(document -> log.debug("Bien result {}", document));
+
+        List<BienDTO> documents1 = mongoTemplate.aggregate(aggregation, Bien.class, BienDTO.class).getMappedResults();
+        documents1.forEach(document -> log.debug("Bien1 result {}", document));
 
         return reactiveMongoTemplate.aggregate(aggregation, Bien.class, BienDTO.class).next();
 
@@ -141,6 +181,17 @@ public class BienServiceImpl implements BienService {
     public Page<Bien> searchCriteria(BienCritere bienCritere) {
 
         return bienRepository.searchBienCriteria(bienCritere);
+    }
+
+    @Override
+    public Mono<String> savePhoto(S3FileDescription s3FileDescription) {
+        return this.findById(s3FileDescription.getBienId()).flatMap(bien -> {
+            bien.getPhotos().add(Photo.builder()
+                    .key(s3FileDescription.getKey())
+                    .url(s3FileDescription.getUrl()).build());
+            log.debug("Save photo : {}", s3FileDescription.getUrl());
+            return this.save(bien).then(Mono.just(s3FileDescription.getUrl()));
+        });
     }
 
 }

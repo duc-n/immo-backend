@@ -1,29 +1,20 @@
-package com.cele.immo.dto;
+package com.cele.immo.mappers;
 
-import com.cele.immo.mappers.BienMapper;
+import com.cele.immo.dto.BienDTO;
 import com.cele.immo.model.Photo;
 import com.cele.immo.model.Role;
 import com.cele.immo.model.UserAccount;
 import com.cele.immo.model.bien.*;
 import com.google.common.collect.Lists;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-public class UserDTO {
-    private String username;
-    private String nom;
-    private String prenom;
-
-    public static void main(String... args) {
+public class BienMapperTest {
+    @Test
+    public void givenBienObject_whenConvertToDTO_thenReturnBienDTO() {
 
         UserAccount admin = UserAccount.builder()
                 .username("admin@gmail.com")
@@ -160,9 +151,18 @@ public class UserDTO {
         BienDTO bienDTO = BienMapper.INSTANCE.toBienDTO(bien);
 
         Bien bienResult = BienMapper.INSTANCE.toBien(bienDTO);
-        System.out.println(bienDTO);
 
-        System.out.println(bienResult);
+        bienResult.setId("ID-BIEN");
+
+        bienDTO.setEtat(EtatBien.VENDU);
+
+        BienMapper.INSTANCE.copyToBien(bienDTO, bienResult);
+
+        Assertions.assertEquals(bien.getDetailBien(), bienResult.getDetailBien());
+
+        Assertions.assertEquals(bienResult.getId(), "ID-BIEN");
+        Assertions.assertEquals(bienResult.getEtat(), EtatBien.VENDU);
+
 
     }
 }

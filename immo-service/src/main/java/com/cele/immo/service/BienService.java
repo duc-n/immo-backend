@@ -3,6 +3,7 @@ package com.cele.immo.service;
 import com.cele.immo.dto.BienCritere;
 import com.cele.immo.dto.BienDTO;
 import com.cele.immo.dto.BienResult;
+import com.cele.immo.dto.S3FileDescription;
 import com.cele.immo.model.bien.Bien;
 import org.springframework.data.domain.Page;
 import reactor.core.publisher.Flux;
@@ -24,5 +25,7 @@ public interface BienService {
     Mono<Page<Bien>> searchCriteriaReactive(BienCritere bienCritere);
 
     Page<Bien> searchCriteria(BienCritere bienCritere);
+
+    Mono<String> savePhoto(S3FileDescription s3FileDescription);
 
 }
