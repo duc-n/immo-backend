@@ -16,7 +16,6 @@ public interface BienMapper {
 
     Bien toBien(BienDTO bienDTO);
 
-    //@Mapping(target = "consultantsAssocies", ignore = true)
     BienDTO toBienDTO(Bien bien);
 
     @Mapping(target = "id", ignore = true)

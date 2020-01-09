@@ -54,9 +54,20 @@ public class BienController {
     }
 
     @GetMapping("/create")
-    public Mono<BienDTO> createBien(ServerWebExchange exchange) {
-        return null;
+    public Mono<BienDTO> createBien() {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .map(Authentication::getPrincipal)
+                .cast(String.class)
+                .flatMap(username -> bienService.createBien(username))
+                .flatMap(bien -> {
+                            BienDTO bienDTO = BienMapper.INSTANCE.toBienDTO(bien);//Proplem MapStruct
+                            log.debug("Create BienDTO: {}", bienDTO);
+                            return Mono.just(bienDTO);
+                        }
+                );
     }
+
 
     @PostMapping("/rechercherBien")
     //@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")

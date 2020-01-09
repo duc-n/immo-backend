@@ -98,8 +98,8 @@ public class BienMapperTest {
                 .conditionsFinancieres(ConditionsFinancieres.builder()
                         .conditionsFinancieres("Condition Financières")
                         .honorairesAgence(1500L)
-                        .paiementHonoraires(600L)
-                        .tvaLoyer(new BigDecimal("19.6"))
+                        .paiementHonoraires("locataire")
+                        .tvaLoyer(true)
                         .build()
                 )
                 .descriptif(Descriptif.builder()
@@ -165,4 +165,47 @@ public class BienMapperTest {
 
 
     }
+
+    @Test
+    public void givenBienObject1_whenConvertToDTO_thenReturnBienDTO() {
+
+        UserAccount admin = UserAccount.builder()
+                .username("admin@gmail.com")
+                .password("toto")
+                .telephone("0686955644")
+                .prenom("duc")
+                .nom("nguyen")
+                .roles(Arrays.asList(Role.ROLE_ADMIN))
+                .active(Boolean.TRUE)
+                .build();
+
+        Bien bien = Bien.builder()
+                .id("id")
+                .etat(EtatBien.CREATION)
+                .detailBien(DetailBien.builder()
+                        .activites(Activites.builder()
+                                .build())
+                        .adresseBien(AdresseBien.builder()
+                                .emplacements(Emplacements.builder()
+                                        .build())
+                                .build())
+                        .build()
+                )
+                .bail(Bail.builder().build())
+                .surface(Surface.builder().build())
+                .visite(Visite.builder().build())
+                .communication(Communication.builder().build())
+                .conditionsFinancieres(ConditionsFinancieres.builder().build())
+                .consultantsAssocies(Lists.newArrayList())
+                .descriptif(Descriptif.builder().build())
+                .consultantId("admin@gmail.com")
+                .consultant(admin)
+                .build();
+
+        BienDTO bienDTO = BienMapper.INSTANCE.toBienDTO(bien);
+
+        Assertions.assertEquals(bienDTO.getId(), "id");
+    }
+
+
 }

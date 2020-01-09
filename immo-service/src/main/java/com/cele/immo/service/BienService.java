@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 public interface BienService {
     Mono<Bien> save(Bien bien);
 
-    Mono<Bien> createBien();
+    Mono<Bien> createBien(String username);
 
     Mono<Bien> findById(String id);
 

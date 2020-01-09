@@ -6,10 +6,10 @@ import com.cele.immo.dto.BienResult;
 import com.cele.immo.dto.S3FileDescription;
 import com.cele.immo.helper.BienMatchHelper;
 import com.cele.immo.model.Photo;
-import com.cele.immo.model.bien.Bien;
-import com.cele.immo.model.bien.EtatBien;
+import com.cele.immo.model.bien.*;
 import com.cele.immo.repository.BienRepository;
 import com.cele.immo.repository.UserAccountRepository;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,8 +53,32 @@ public class BienServiceImpl implements BienService {
     }
 
     @Override
-    public Mono<Bien> createBien() {
-        return null;
+    public Mono<Bien> createBien(String username) {
+        return userAccountRepository.findByUsername(username)
+                .flatMap(userAccount -> {
+                    Bien bien = Bien.builder()
+                            .etat(EtatBien.CREATION)
+                            .detailBien(DetailBien.builder()
+                                    .activites(Activites.builder()
+                                            .build())
+                                    .adresseBien(AdresseBien.builder()
+                                            .emplacements(Emplacements.builder()
+                                                    .build())
+                                            .build())
+                                    .build()
+                            )
+                            .bail(Bail.builder().build())
+                            .surface(Surface.builder().build())
+                            .visite(Visite.builder().build())
+                            .communication(Communication.builder().build())
+                            .conditionsFinancieres(ConditionsFinancieres.builder().build())
+                            .consultantsAssocies(Lists.newArrayList())
+                            .descriptif(Descriptif.builder().build())
+                            .consultantId(username)
+                            .consultant(userAccount)
+                            .build();
+                    return this.save(bien);
+                });
     }
 
     @Override
