@@ -5,12 +5,10 @@ import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.design.JasperDesign;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -38,6 +36,7 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
             // Create parameters map.
             final Map<String, Object> parameters = parameters("order", locale);
 
+            //ByteArrayResource
             // Create an empty datasource.
             final JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(Collections.singletonList("Invoice"));
 
@@ -49,6 +48,34 @@ public class PdfGeneratorServiceImpl implements PdfGeneratorService {
 
         } catch (final Exception e) {
             log.error(String.format("An error occured during PDF creation: %s", e));
+        }
+    }
+
+    @Override
+    public ByteArrayResource generatePdfResource(Locale locale) {
+
+        try {
+            // Load invoice jrxml template.
+            final JasperReport jasperReport = loadTemplate();
+
+            // Create parameters map.
+            final Map<String, Object> parameters = parameters("order", locale);
+
+            // Create an empty datasource.
+            final JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(Collections.singletonList("Invoice"));
+
+            // Fill the report
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters,
+                    jrBeanCollectionDataSource);
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            JasperExportManager.exportReportToPdfStream(jasperPrint, outputStream);
+
+            byte[] reportContent = outputStream.toByteArray();
+            return new ByteArrayResource(reportContent);
+        } catch (final Exception e) {
+            log.error(String.format("An error occured during PDF creation: %s", e));
+            return null;
         }
     }
 
