@@ -2,9 +2,11 @@ package com.cele.immo.service;
 
 import com.cele.immo.config.PBKDF2Encoder;
 import com.cele.immo.dto.ConsultantDTO;
+import com.cele.immo.dto.UserRegister;
 import com.cele.immo.model.Role;
 import com.cele.immo.model.UserAccount;
 import com.cele.immo.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -18,31 +20,31 @@ import java.util.Arrays;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.project;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PBKDF2Encoder bcryptEncoder;
-
-    @Autowired
     ReactiveMongoTemplate reactiveMongoTemplate;
-
     //username:passwowrd -> user:user
     UserAccount user = UserAccount.builder().username("user")
             .password("kqNGOfikyqJ+IceZ8hkcbeXY5O6VymY3RcB8DGFtX1I=")
             .active(true)
             .roles(Arrays.asList(Role.ROLE_USER))
             .build();
-
     //username:passwowrd -> admin:admin
     UserAccount admin = UserAccount.builder().username("admin")
             .password("z7gzSlbhkR6AWDl0CP9OwIDg9aafiUyFZpc27kQdL4U=")
             .active(true)
             .roles(Arrays.asList(Role.ROLE_ADMIN))
             .build();
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PBKDF2Encoder bcryptEncoder;
 
+    public static ProjectionOperation getProjectOperation() {
+        return project("id", "nom", "prenom", "username", "telephone");
+    }
 
     @Override
     public Mono<UserAccount> findByUsername(String username) {
@@ -72,7 +74,20 @@ public class UserServiceImpl implements UserService {
         return consultantDTOFlux;
     }
 
-    public static ProjectionOperation getProjectOperation() {
-        return project("id", "nom", "prenom", "username", "telephone");
+    @Override
+    public Mono<UserAccount> userRegister(UserRegister userRegister) {
+        UserAccount userAccount = UserAccount.builder()
+                .active(true)
+                .nom(userRegister.getNom())
+                .prenom(userRegister.getPrenom())
+                .telephone(userRegister.getTelephone())
+                .password(bcryptEncoder.encode(userRegister.getPassword()))
+                .username(userRegister.getEmail())
+                .build();
+
+        log.debug("The user :{} has been registered", userRegister.getEmail());
+
+        return userRepository.save(userAccount);
+
     }
 }

@@ -11,12 +11,12 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class GenericceptionWrapper extends DefaultErrorAttributes {
+public class GenericExceptionWrapper extends DefaultErrorAttributes {
 
     @Autowired
     private ReqTracer tracer;
 
-    GenericceptionWrapper(ReqTracer tracer) {
+    GenericExceptionWrapper(ReqTracer tracer) {
         super(false);
     }
 
