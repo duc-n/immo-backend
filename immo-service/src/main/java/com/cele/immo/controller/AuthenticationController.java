@@ -46,7 +46,7 @@ public class AuthenticationController {
 
         return userService.findByUsername(ar.getUsername()).map((userDetails) -> {
             if (passwordEncoder.encode(ar.getPassword()).equals(userDetails.getPassword())) {
-                return ResponseEntity.ok(new AuthResponse(jwtUtil.generateToken(userDetails), new UserDTO(userDetails.getUsername(), userDetails.getNom(), userDetails.getPrenom())));
+                return ResponseEntity.ok(new AuthResponse(jwtUtil.generateToken(userDetails), new UserDTO(userDetails.getUsername(), userDetails.getNom(), userDetails.getPrenom(), userDetails.hasAdminRole())));
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }

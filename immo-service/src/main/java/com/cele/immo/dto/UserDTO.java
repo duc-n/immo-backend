@@ -22,6 +22,7 @@ public class UserDTO {
     private String username;
     private String nom;
     private String prenom;
+    private boolean admin;
 
     public static void main(String... args) {
 

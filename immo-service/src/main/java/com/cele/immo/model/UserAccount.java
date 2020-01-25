@@ -44,6 +44,10 @@ public class UserAccount implements UserDetails {
         return this.roles.stream().map(authority -> new SimpleGrantedAuthority(authority.name())).collect(Collectors.toList());
     }
 
+    public boolean hasAdminRole() {
+        return roles.stream().map(role -> role.name()).collect((Collectors.toList())).contains(Role.ROLE_ADMIN.name());
+    }
+
     @Override
     public String getPassword() {
         return password;
