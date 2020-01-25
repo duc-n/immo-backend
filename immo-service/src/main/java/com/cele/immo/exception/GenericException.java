@@ -1,22 +1,15 @@
 package com.cele.immo.exception;
 
-import lombok.Getter;
 import lombok.ToString;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @ToString(callSuper = true)
-abstract class GenericException extends RuntimeException {
-    @Getter
-    private final HttpStatus status;
+abstract class GenericException extends ResponseStatusException {
 
     GenericException(HttpStatus status, String message) {
-        super(message);
-        this.status = status;
+        super(status, message);
     }
 
-    GenericException(HttpStatus status, String message, Throwable cause) {
-        super(message, cause);
-        this.status = status;
-    }
 
 }

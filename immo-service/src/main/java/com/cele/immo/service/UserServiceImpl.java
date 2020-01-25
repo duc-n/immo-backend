@@ -2,6 +2,7 @@ package com.cele.immo.service;
 
 import com.cele.immo.config.PBKDF2Encoder;
 import com.cele.immo.dto.ConsultantDTO;
+import com.cele.immo.dto.UserProfile;
 import com.cele.immo.dto.UserRegister;
 import com.cele.immo.model.Role;
 import com.cele.immo.model.UserAccount;
@@ -12,6 +13,7 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -48,6 +50,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mono<UserAccount> findByUsername(String username) {
+        log.debug("findByUserName userName:{}", username);
         /*
         if (username.equals("user")) {
             return Mono.just(user);
@@ -76,6 +79,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mono<UserAccount> userRegister(UserRegister userRegister) {
+
         UserAccount userAccount = UserAccount.builder()
                 .active(true)
                 .nom(userRegister.getNom())
@@ -85,9 +89,24 @@ public class UserServiceImpl implements UserService {
                 .username(userRegister.getEmail())
                 .build();
 
-        log.debug("The user :{} has been registered", userRegister.getEmail());
-
         return userRepository.save(userAccount);
 
     }
+
+    @Override
+    public Mono<UserProfile> updateUser(UserAccount userAccount, UserProfile userProfile) {
+        log.debug("Update user :{}", userAccount);
+        return Mono.fromSupplier(
+                () -> {
+                    log.debug("Update profile");
+                    if (StringUtils.hasLength(userProfile.getNewPassword())) {
+                        userProfile.setNewPassword(bcryptEncoder.encode(userProfile.getNewPassword()));
+                    }
+                    userRepository.save(userAccount.update(userProfile))
+                            .subscribe();
+                    return userProfile;
+                }
+        );
+    }
+
 }
