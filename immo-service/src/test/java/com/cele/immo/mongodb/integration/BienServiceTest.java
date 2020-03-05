@@ -11,7 +11,6 @@ import com.cele.immo.repository.UserAccountRepository;
 import com.cele.immo.service.BienService;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Flux;
@@ -218,7 +217,7 @@ public class BienServiceTest {
                 .verifyComplete();
     }
 
-    @Test
+    //@Test
     public void givenUserObject_whenSave_thenCreateNewUser() {
 
         Publisher<UserAccount> setup = this.userAccountRepository.deleteAll()
