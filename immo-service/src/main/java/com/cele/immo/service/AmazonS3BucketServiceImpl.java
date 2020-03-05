@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.cele.immo.dto.S3FileDescription;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -35,29 +36,39 @@ public class AmazonS3BucketServiceImpl implements AmazonS3BucketService {
     }
 
     @Override
-    public Mono<String> uploadFile(FilePart filePart) {
+    public Mono<S3FileDescription> uploadFile(String userName, String bienId, FilePart filePart) {
+        log.debug("UserName: {}", userName);
 
         return DataBufferUtils.join(filePart.content())
                 .map(dataBuffer -> {
                     String filename = filePart.filename();
-                    log.debug("filename : {}", filename);
-                    log.debug("Data length : {}", dataBuffer.capacity());
+                    String key = userName + "/" + bienId + "/" + filename;
+                    log.debug("UploadFile key : {} - Data Length :{} - UserName :{}", key, dataBuffer.capacity());
 
                     ObjectMetadata metadata = new ObjectMetadata();
                     metadata.setContentLength(dataBuffer.capacity());
-                    PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, "14257/47857/" + filename, dataBuffer.asInputStream(), metadata);
+                    PutObjectRequest putObjectRequest = new PutObjectRequest(bucketName, key, dataBuffer.asInputStream(), metadata);
 
                     amazonS3.putObject(putObjectRequest
                             .withCannedAcl(CannedAccessControlList.PublicRead));
 
-                    return filename;
+                    S3FileDescription s3FileDescription = S3FileDescription.builder()
+                            .url(amazonS3.getUrl(bucketName, key).toExternalForm())
+                            .key(key)
+                            .bienId(bienId)
+                            .username(userName)
+                            .build();
+
+                    log.debug("S3FileDescription: {}", s3FileDescription);
+
+                    return s3FileDescription;
                 });
     }
 
     @Override
-    public String deleteFile(String fileName) {
-        amazonS3.deleteObject(new DeleteObjectRequest(bucketName, fileName));
-        return "Deletion Successful";
+    public Mono<Void> deleteFile(String fileName) {
+        amazonS3.deleteObject(new DeleteObjectRequest(bucketName, "14257/47857/" + fileName));
+        return Mono.empty();
     }
 
 

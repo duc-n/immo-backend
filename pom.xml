@@ -10,9 +10,9 @@
     <description>Immo Spring Boot</description>
 
     <modules>
-        <module>config</module>
+        <!--<module>config</module>
         <module>discovery-service</module>
-        <module>api-gateway</module>
+        <module>api-gateway</module>-->
         <module>immo-service</module>
     </modules>
 

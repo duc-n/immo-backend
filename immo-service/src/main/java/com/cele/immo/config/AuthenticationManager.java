@@ -1,12 +1,14 @@
 package com.cele.immo.config;
 
 import com.cele.immo.model.Role;
+import com.cele.immo.model.UserAccount;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -42,6 +44,9 @@ public class AuthenticationManager implements ReactiveAuthenticationManager {
                     null,
                     roles.stream().map(authority -> new SimpleGrantedAuthority(authority.name())).collect(Collectors.toList())
             );
+
+            auth.setDetails(UserAccount.builder().username(username));
+            SecurityContextHolder.getContext().setAuthentication(auth);
             return Mono.just(auth);
         } else {
             return Mono.empty();

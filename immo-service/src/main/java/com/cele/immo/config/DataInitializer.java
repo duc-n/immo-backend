@@ -11,6 +11,7 @@ import com.cele.immo.repository.ClientRepository;
 import com.cele.immo.repository.UserAccountRepository;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ResourceLoader;
@@ -32,6 +33,7 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 @Component
 @Slf4j
 public class DataInitializer {
+    @Autowired
     private final BienRepository bienRepository;
     private final ClientRepository clientRepository;
     private final AcquereurRepository acquereurRepository;
@@ -187,8 +189,10 @@ public class DataInitializer {
                                         i -> this.bienRepository.save(
                                                 Bien.builder()
                                                         .consultantId("admin@gmail.com")
+                                                        .consultant(userList.get(1))
                                                         .consultantsAssocies(Lists.newArrayList(ConsultantAssocie.builder()
                                                                 .consultantId("user@gmail.com")
+                                                                .consultant(userList.get(0))
                                                                 .commission(25)
                                                                 .build()))
                                                         .etat(i % 2 == 1 ? EtatBien.CREATION : EtatBien.ACTIVE)
@@ -240,8 +244,8 @@ public class DataInitializer {
                                                         .conditionsFinancieres(ConditionsFinancieres.builder()
                                                                 .conditionsFinancieres("Condition Financières")
                                                                 .honorairesAgence(1500L + i)
-                                                                .paiementHonoraires(600L - i)
-                                                                .tvaLoyer(new BigDecimal("19.6"))
+                                                                .paiementHonoraires("locataire")
+                                                                .tvaLoyer(true)
                                                                 .build()
                                                         )
                                                         .descriptif(Descriptif.builder()
@@ -284,10 +288,12 @@ public class DataInitializer {
                                                                 .interphone("94344")
                                                                 .build()
                                                         )
-                                                        .photos(Lists.newArrayList(Photo.builder().title("Image")
+                                                        /*
+                                                        .photos(Lists.newArrayList(Photo.builder()
+                                                                .url("https://cele-immo-sandbox.s3.eu-west-2.amazonaws.com/admin%40gmail.com/5dffde8ed5952a28235b28be/memoire1.png")
                                                                 //.image(new Binary(BsonBinarySubType.BINARY, inputByte))
                                                                 .build()
-                                                        ))
+                                                        ))*/
                                                         .build()
                                         )
                                 )
