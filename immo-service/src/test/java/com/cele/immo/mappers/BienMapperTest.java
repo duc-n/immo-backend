@@ -161,7 +161,7 @@ public class BienMapperTest {
         Assertions.assertEquals(bien.getDetailBien(), bienResult.getDetailBien());
 
         Assertions.assertEquals(bienResult.getId(), "ID-BIEN");
-        Assertions.assertEquals(bienResult.getEtat(), EtatBien.VENDU);
+        Assertions.assertEquals(bienResult.getEtat(), EtatBien.CREATION);
 
 
     }
