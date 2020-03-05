@@ -1,9 +1,4 @@
 pipeline {
-  agent any
-  stages {
-    stage('Build Assert') {
-      steps {
-        sh '''pipeline {
  agent any
  environment {
   // This can be nexus3 or nexus2
@@ -16,7 +11,7 @@ pipeline {
   NEXUS_REPOSITORY = "maven-snapshots"
   // Jenkins credential id to authenticate to Nexus OSS
   NEXUS_CREDENTIAL_ID = "nexus-credentials"
-  /* 
+  /*
     Windows: set the ip address of docker host. In my case 192.168.99.100.
     to obtains this address : $ docker-machine ip
     Linux: set localhost to SONARQUBE_URL
@@ -28,141 +23,141 @@ pipeline {
   skipDefaultCheckout()
  }
  stages {
-  stage(\'SCM\') {
+  stage('SCM') {
    steps {
     checkout scm
    }
   }
-  stage(\'Build\') {
+  stage('Build') {
    parallel {
-    stage(\'Compile\') {
+    stage('Compile') {
      agent {
       docker {
-       image \'maven:3.6.0-jdk-8-alpine\'
-       args \'-v /root/.m2/repository:/root/.m2/repository\'
+       image 'maven:3.6.0-jdk-8-alpine'
+       args '-v /root/.m2/repository:/root/.m2/repository'
        // to use the same node and workdir defined on top-level pipeline for all docker agents
        reuseNode true
       }
      }
      steps {
-      sh \' mvn clean compile\'
+      sh ' mvn clean compile'
      }
     }
-    stage(\'CheckStyle\') {
+    stage('CheckStyle') {
      agent {
       docker {
-       image \'maven:3.6.0-jdk-8-alpine\'
-       args \'-v /root/.m2/repository:/root/.m2/repository\'
+       image 'maven:3.6.0-jdk-8-alpine'
+       args '-v /root/.m2/repository:/root/.m2/repository'
        reuseNode true
       }
      }
      steps {
-      sh \' mvn checkstyle:checkstyle\'
-      step([$class: \'CheckStylePublisher\',
+      sh ' mvn checkstyle:checkstyle'
+      step([$class: 'CheckStylePublisher',
        //canRunOnFailed: true,
-       defaultEncoding: \'\',
-       healthy: \'100\',
-       pattern: \'**/target/checkstyle-result.xml\',
-       unHealthy: \'90\',
+       defaultEncoding: '',
+       healthy: '100',
+       pattern: '**/target/checkstyle-result.xml',
+       unHealthy: '90',
        //useStableBuildAsReference: true
       ])
      }
     }
    }
   }
-  stage(\'Unit Tests\') {
+  stage('Unit Tests') {
    when {
-    anyOf { branch \'master\'; branch \'develop\' }
+    anyOf { branch 'master'; branch 'develop' }
    }
    agent {
     docker {
-     image \'maven:3.6.0-jdk-8-alpine\'
-     args \'-v /root/.m2/repository:/root/.m2/repository\'
+     image 'maven:3.6.0-jdk-8-alpine'
+     args '-v /root/.m2/repository:/root/.m2/repository'
      reuseNode true
     }
    }
    steps {
-    sh \'mvn test\'
+    sh 'mvn test'
    }
    post {
     always {
-     junit \'target/surefire-reports/**/*.xml\'
+     junit 'target/surefire-reports/**/*.xml'
     }
    }
   }
-  stage(\'Integration Tests\') {
+  stage('Integration Tests') {
    when {
-    anyOf { branch \'master\'; branch \'develop\' }
+    anyOf { branch 'master'; branch 'develop' }
    }
    agent {
     docker {
-     image \'maven:3.6.0-jdk-8-alpine\'
-     args \'-v /root/.m2/repository:/root/.m2/repository\'
+     image 'maven:3.6.0-jdk-8-alpine'
+     args '-v /root/.m2/repository:/root/.m2/repository'
      reuseNode true
     }
    }
    steps {
-    sh \'mvn verify -Dsurefire.skip=true\'
+    sh 'mvn verify -Dsurefire.skip=true'
    }
    post {
     always {
-     junit \'target/failsafe-reports/**/*.xml\'
+     junit 'target/failsafe-reports/**/*.xml'
     }
     success {
-     stash(name: \'artifact\', includes: \'target/*.war\')
-     stash(name: \'pom\', includes: \'pom.xml\')
+     stash(name: 'artifact', includes: 'target/*.war')
+     stash(name: 'pom', includes: 'pom.xml')
      // to add artifacts in jenkins pipeline tab (UI)
-     archiveArtifacts \'target/*.war\'
+     archiveArtifacts 'target/*.war'
     }
    }
   }
-  stage(\'Code Quality Analysis\') {
+  stage('Code Quality Analysis') {
    parallel {
-    stage(\'PMD\') {
+    stage('PMD') {
      agent {
       docker {
-       image \'maven:3.6.0-jdk-8-alpine\'
-       args \'-v /root/.m2/repository:/root/.m2/repository\'
+       image 'maven:3.6.0-jdk-8-alpine'
+       args '-v /root/.m2/repository:/root/.m2/repository'
        reuseNode true
       }
      }
      steps {
-      sh \' mvn pmd:pmd\'
+      sh ' mvn pmd:pmd'
       // using pmd plugin
-      step([$class: \'PmdPublisher\', pattern: \'**/target/pmd.xml\'])
+      step([$class: 'PmdPublisher', pattern: '**/target/pmd.xml'])
      }
     }
-    stage(\'Findbugs\') {
+    stage('Findbugs') {
      agent {
       docker {
-       image \'maven:3.6.0-jdk-8-alpine\'
-       args \'-v /root/.m2/repository:/root/.m2/repository\'
+       image 'maven:3.6.0-jdk-8-alpine'
+       args '-v /root/.m2/repository:/root/.m2/repository'
        reuseNode true
       }
      }
      steps {
-      sh \' mvn findbugs:findbugs\'
+      sh ' mvn findbugs:findbugs'
       // using findbugs plugin
-      findbugs pattern: \'**/target/findbugsXml.xml\'
+      findbugs pattern: '**/target/findbugsXml.xml'
      }
     }
-    stage(\'JavaDoc\') {
+    stage('JavaDoc') {
      agent {
       docker {
-       image \'maven:3.6.0-jdk-8-alpine\'
-       args \'-v /root/.m2/repository:/root/.m2/repository\'
+       image 'maven:3.6.0-jdk-8-alpine'
+       args '-v /root/.m2/repository:/root/.m2/repository'
        reuseNode true
       }
      }
      steps {
-      sh \' mvn javadoc:javadoc\'
-      step([$class: \'JavadocArchiver\', javadocDir: \'./target/site/apidocs\', keepAll: \'true\'])
+      sh ' mvn javadoc:javadoc'
+      step([$class: 'JavadocArchiver', javadocDir: './target/site/apidocs', keepAll: 'true'])
      }
     }
-    stage(\'SonarQube\') {
+    stage('SonarQube') {
      agent {
       docker {
-       image \'maven:3.6.0-jdk-8-alpine\'
+       image 'maven:3.6.0-jdk-8-alpine'
        args "-v /root/.m2/repository:/root/.m2/repository"
        reuseNode true
       }
@@ -175,19 +170,19 @@ pipeline {
    post {
     always {
      // using warning next gen plugin
-     recordIssues aggregatingResults: true, tools: [javaDoc(), checkStyle(pattern: \'**/target/checkstyle-result.xml\'), findBugs(pattern: \'**/target/findbugsXml.xml\', useRankAsPriority: true), pmdParser(pattern: \'**/target/pmd.xml\')]
+     recordIssues aggregatingResults: true, tools: [javaDoc(), checkStyle(pattern: '**/target/checkstyle-result.xml'), findBugs(pattern: '**/target/findbugsXml.xml', useRankAsPriority: true), pmdParser(pattern: '**/target/pmd.xml')]
     }
    }
   }
-  stage(\'Deploy Artifact To Nexus\') {
+  stage('Deploy Artifact To Nexus') {
    when {
-    anyOf { branch \'master\'; branch \'develop\' }
+    anyOf { branch 'master'; branch 'develop' }
    }
    steps {
     script {
-     unstash \'pom\'
-     unstash \'artifact\'
-     // Read POM xml file using \'readMavenPom\' step , this step \'readMavenPom\' is included in: https://plugins.jenkins.io/pipeline-utility-steps
+     unstash 'pom'
+     unstash 'artifact'
+     // Read POM xml file using 'readMavenPom' step , this step 'readMavenPom' is included in: https://plugins.jenkins.io/pipeline-utility-steps
      pom = readMavenPom file: "pom.xml";
      // Find built artifact under target folder
      filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
@@ -209,13 +204,13 @@ pipeline {
        artifacts: [
         // Artifact generated such as .jar, .ear and .war files.
         [artifactId: pom.artifactId,
-         classifier: \'\',
+         classifier: '',
          file: artifactPath,
          type: pom.packaging
         ],
         // Lets upload the pom.xml file for additional information for Transitive dependencies
         [artifactId: pom.artifactId,
-         classifier: \'\',
+         classifier: '',
          file: "pom.xml",
          type: "pom"
         ]
@@ -227,13 +222,13 @@ pipeline {
     }
    }
   }
-  stage(\'Deploy to Staging Servers\') {
+  stage('Deploy to Staging Servers') {
    when {
-    anyOf { branch \'master\'; branch \'develop\' }
+    anyOf { branch 'master'; branch 'develop' }
    }
    agent {
     docker {
-     image \'ahmed24khaled/ansible-management\'
+     image 'ahmed24khaled/ansible-management'
      reuseNode true
     }
    }
@@ -245,29 +240,29 @@ pipeline {
      version = pom.version
      artifactId = pom.artifactId
      withEnv(["ANSIBLE_HOST_KEY_CHECKING=False", "APP_NAME=${artifactId}", "repoPath=${repoPath}", "version=${version}"]) {
-      sh \'\'\'
-      
+      sh '''
+
         curl --silent "http://$NEXUS_URL/repository/maven-snapshots/${repoPath}/${version}/maven-metadata.xml" > tmp &&
-        egrep \'<value>+([0-9\\\\-\\\\.]*)\' tmp > tmp2 &&
+        egrep '<value>+([0-9\\-\\.]*)' tmp > tmp2 &&
         tail -n 1 tmp2 > tmp3 &&
         tr -d "</value>[:space:]" < tmp3 > tmp4 &&
         REPO_VERSION=$(cat tmp4) &&
 
         export APP_SRC_URL="http://${NEXUS_URL}/repository/maven-snapshots/${repoPath}/${version}/${APP_NAME}-${REPO_VERSION}.war" &&
-        ansible-playbook -v -i ./ansible_provisioning/hosts --extra-vars "host=staging" ./ansible_provisioning/playbook.yml 
+        ansible-playbook -v -i ./ansible_provisioning/hosts --extra-vars "host=staging" ./ansible_provisioning/playbook.yml
 
-       \'\'\'
+       '''
      }
     }
    }
   }
-   stage(\'Deploy to Production Servers\') {
+   stage('Deploy to Production Servers') {
    when {
-    branch \'master\'
+    branch 'master'
    }
    agent {
     docker {
-     image \'ahmed24khaled/ansible-management\'
+     image 'ahmed24khaled/ansible-management'
      reuseNode true
     }
    }
@@ -279,26 +274,21 @@ pipeline {
      version = pom.version
      artifactId = pom.artifactId
      withEnv(["ANSIBLE_HOST_KEY_CHECKING=False", "APP_NAME=${artifactId}", "repoPath=${repoPath}", "version=${version}"]) {
-      sh \'\'\'
-      
+      sh '''
+
         curl --silent "$NEXUS_URL/repository/maven-snapshots/${repoPath}/${version}/maven-metadata.xml" > tmp &&
-        egrep \'<value>+([0-9\\\\-\\\\.]*)\' tmp > tmp2 &&
+        egrep '<value>+([0-9\\-\\.]*)' tmp > tmp2 &&
         tail -n 1 tmp2 > tmp3 &&
         tr -d "</value>[:space:]" < tmp3 > tmp4 &&
         REPO_VERSION=$(cat tmp4) &&
 
         export APP_SRC_URL="http://${NEXUS_URL}/repository/maven-snapshots/${repoPath}/${version}/${APP_NAME}-${REPO_VERSION}.war" &&
-        ansible-playbook -v -i ./ansible_provisioning/hosts --extra-vars "host=production" ./ansible_provisioning/playbook.yml 
+        ansible-playbook -v -i ./ansible_provisioning/hosts --extra-vars "host=production" ./ansible_provisioning/playbook.yml
 
-       \'\'\'
+       '''
      }
     }
    }
   }
  }
-}'''
-        }
-      }
-
-    }
-  }
+}
