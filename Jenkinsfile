@@ -67,7 +67,7 @@ pipeline {
   }
   stage('Unit Tests') {
    when {
-    anyOf { branch 'master'; branch 'develop' }
+    anyOf { branch 'master'; branch 'dev' }
    }
    agent {
     docker {
@@ -81,13 +81,13 @@ pipeline {
    }
    post {
     always {
-     junit 'target/surefire-reports/**/*.xml'
+     junit '**/target/surefire-reports/**/*.xml'
     }
    }
   }
   stage('Integration Tests') {
    when {
-    anyOf { branch 'master'; branch 'develop' }
+    anyOf { branch 'master'; branch 'dev' }
    }
    agent {
     docker {
@@ -104,7 +104,7 @@ pipeline {
      junit 'target/failsafe-reports/**/*.xml'
     }
     success {
-     stash(name: 'artifact', includes: 'target/*.war')
+     stash(name: 'artifact', includes: 'target/*.jar')
      stash(name: 'pom', includes: 'pom.xml')
      // to add artifacts in jenkins pipeline tab (UI)
      archiveArtifacts 'target/*.war'
