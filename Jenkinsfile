@@ -55,7 +55,7 @@ pipeline {
         }
         steps {
             withSonarQubeEnv('SonarCele') {
-                sh 'mvn clean install sonar:sonar -Dsonar.login=4f07d4d15d7774a6b360783d0da931e31cd6172b'
+                sh 'mvn clean install -U -DskipTests sonar:sonar -Dsonar.login=4f07d4d15d7774a6b360783d0da931e31cd6172b'
             }
             timeout(time: 10, unit: 'MINUTES') {
                 waitForQualityGate abortPipeline: true
