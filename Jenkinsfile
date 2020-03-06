@@ -43,6 +43,20 @@ pipeline {
       sh ' mvn clean compile'
      }
     }
+
+    stage('Sonarqube') {
+          environment {
+              scannerHome = tool 'SonarQubeScanner'
+          }
+          steps {
+              withSonarQubeEnv('SonarCele') {
+                  sh "${scannerHome}/bin/sonar-scanner"
+              }
+              timeout(time: 10, unit: 'MINUTES') {
+                  waitForQualityGate abortPipeline: true
+              }
+          }
+      }
     stage('CheckStyle') {
      agent {
       docker {
@@ -108,19 +122,7 @@ pipeline {
     }
    }
   }
-  stage('Sonarqube') {
-      environment {
-          scannerHome = tool 'SonarQubeScanner'
-      }
-      steps {
-          withSonarQubeEnv('SonarCele') {
-              sh "${scannerHome}/bin/sonar-scanner"
-          }
-          timeout(time: 10, unit: 'MINUTES') {
-              waitForQualityGate abortPipeline: true
-          }
-      }
-  }
+
   stage('Deploy Artifact To Nexus') {
    when {
     anyOf { branch 'master'; branch 'develop' }
