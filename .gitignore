@@ -32,9 +32,7 @@ build/
 .DS_Store
 
 ### Docker-compose###
-**/logs
-**/postgresql_data/
-
+/docker/postgresql_data/
 /docker/sonarqube_conf/
 /docker/sonarqube_data/
 /docker/sonarqube_extensions/

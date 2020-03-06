@@ -13,18 +13,6 @@ services:
       - "8085:8080"
     networks:
       - devops
-  sonarqube:
-    image: sonarqube:alpine
-    volumes:
-      - ./sonarqube/conf:/opt/sonarqube/conf
-      - ./sonarqube/data:/opt/sonarqube/data
-      - ./sonarqube/extensions:/opt/sonarqube/extensions
-    ports:
-      - "9000:9000"
-      #  H2 embedded database server listening port, defaults to 9092
-      - "9092:9092"
-    networks:
-      - devops
   nexus:
     image: sonatype/nexus3
     volumes:
@@ -33,8 +21,35 @@ services:
       - "8081:8081"
     networks:
       - devops
-
+  sonarqube:
+    image: sonarqube
+    expose:
+      - 9000
+    ports:
+      - "127.0.0.1:9000:9000"
+    networks:
+      - devops
+    environment:
+      - sonar.jdbc.username=sonar
+      - sonar.jdbc.password=sonar
+      - sonar.jdbc.url=jdbc:postgresql://db/sonar
+    volumes:
+      - ./sonarqube_conf:/opt/sonarqube/conf
+      - ./sonarqube_data:/opt/sonarqube/data
+      - ./sonarqube_extensions:/opt/sonarqube/extensions
+      - ./sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
+  db:
+    image: postgres
+    networks:
+      - devops
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+    volumes:
+      - ./postgresql:/var/lib/postgresql
+      - ./postgresql_data:/var/lib/postgresql/data
 networks:
   devops:
     name: devops
     driver: bridge
+
