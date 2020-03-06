@@ -44,42 +44,24 @@ pipeline {
      }
     }
 
-    stage("build & SonarQube analysis") {
-      agent {
-        docker {
-          image 'maven:3.6.0-jdk-8-alpine'
-          args '-v /root/.m2/repository:/root/.m2/repository'
-          // to use the same node and workdir defined on top-level pipeline for all docker agents
-          reuseNode true
-        }
-      }
-      steps {
-        withSonarQubeEnv('My SonarQube Server') {
-          sh 'mvn clean package sonar:sonar'
-        }
-      }
-    }
-    stage("Quality Gate") {
-      steps {
-        timeout(time: 1, unit: 'HOURS') {
-          waitForQualityGate abortPipeline: true
-        }
-      }
-    }
-    /*
     stage('Sonarqube') {
-          environment {
-              scannerHome = tool 'SonarQubeScanner'
-          }
-          steps {
-              withSonarQubeEnv('SonarCele') {
-                  sh "${scannerHome}/bin/sonar-scanner"
+        agent {
+              docker {
+              image 'maven:3.6.0-jdk-8-alpine'
+              args '-v /root/.m2/repository:/root/.m2/repository'
+              // to use the same node and workdir defined on top-level pipeline for all docker agents
+              reuseNode true
               }
-              timeout(time: 10, unit: 'MINUTES') {
-                  waitForQualityGate abortPipeline: true
-              }
-          }
-      }*/
+        }
+        steps {
+            withSonarQubeEnv('SonarCele') {
+                sh 'mvn clean install sonar:sonar -Dsonar.login=4f07d4d15d7774a6b360783d0da931e31cd6172b'
+            }
+            timeout(time: 10, unit: 'MINUTES') {
+                waitForQualityGate abortPipeline: true
+            }
+        }
+      }
     stage('CheckStyle') {
      agent {
       docker {
