@@ -108,19 +108,18 @@ pipeline {
     }
    }
   }
-  stage('Code Quality Analysis') {
-    agent {
-      docker {
-      image 'maven:3.6.0-jdk-8-alpine'
-      args '-v /root/.m2/repository:/root/.m2/repository'
-      reuseNode true
+  stage('Sonarqube') {
+      environment {
+          scannerHome = tool 'SonarQubeScanner'
       }
-   }
-   steps {
-     withSonarQubeEnv('SonarCele') {
-          sh ' mvn sonar:sonar'
-        }
-   }
+      steps {
+          withSonarQubeEnv('SonarCele') {
+              sh "${scannerHome}/bin/sonar-scanner"
+          }
+          timeout(time: 10, unit: 'MINUTES') {
+              waitForQualityGate abortPipeline: true
+          }
+      }
   }
   stage('Deploy Artifact To Nexus') {
    when {
