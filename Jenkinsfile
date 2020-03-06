@@ -28,43 +28,68 @@ pipeline {
     checkout scm
    }
   }
-  stage('Build') {
-   parallel {
-    stage('Compile') {
-     agent {
-      docker {
-       image 'maven:3.6.0-jdk-8-alpine'
-       args '-v /root/.m2/repository:/root/.m2/repository'
-       // to use the same node and workdir defined on top-level pipeline for all docker agents
-       reuseNode true
+  stage('Sonarqube') {
+      agent {
+            docker {
+            image 'maven:3.6.0-jdk-8-alpine'
+            args '-v /root/.m2/repository:/root/.m2/repository'
+            // to use the same node and workdir defined on top-level pipeline for all docker agents
+            reuseNode true
+            }
       }
-     }
-     steps {
-      sh ' mvn clean compile'
-     }
+      steps {
+          withSonarQubeEnv('SonarCele') {
+              sh 'mvn clean install -U -DskipTests sonar:sonar -Dsonar.login=4f07d4d15d7774a6b360783d0da931e31cd6172b'
+          }
+          timeout(time: 10, unit: 'MINUTES') {
+              waitForQualityGate abortPipeline: true
+          }
+      }
+  }
+
+  stage('Unit Tests') {
+   when {
+    anyOf { branch 'master'; branch 'dev' }
+   }
+   agent {
+    docker {
+     image 'maven:3.6.0-jdk-8-alpine'
+     args '-v /root/.m2/repository:/root/.m2/repository'
+     reuseNode true
     }
-
-    stage('Sonarqube') {
-        agent {
-              docker {
-              image 'maven:3.6.0-jdk-8-alpine'
-              args '-v /root/.m2/repository:/root/.m2/repository'
-              // to use the same node and workdir defined on top-level pipeline for all docker agents
-              reuseNode true
-              }
-        }
-        steps {
-            withSonarQubeEnv('SonarCele') {
-                sh 'mvn clean install -U -DskipTests sonar:sonar -Dsonar.login=4f07d4d15d7774a6b360783d0da931e31cd6172b'
-            }
-            timeout(time: 10, unit: 'MINUTES') {
-                waitForQualityGate abortPipeline: true
-            }
-        }
+   }
+   steps {
+    sh 'mvn test'
+   }
+   post {
+    always {
+     junit '**/target/surefire-reports/**/*.xml'
     }
-
-
-
+   }
+  }
+  stage('Build Package') {
+   when {
+    anyOf { branch 'master'; branch 'dev' }
+   }
+   agent {
+    docker {
+     image 'maven:3.6.0-jdk-8-alpine'
+     args '-v /root/.m2/repository:/root/.m2/repository'
+     reuseNode true
+    }
+   }
+   steps {
+    sh ' mvn package -DskipTests=true'
+   }
+   post {
+    success {
+     stash(name: 'artifact', includes: '**/target/*.jar')
+     stash(name: 'pom', includes: 'pom.xml')
+     // to add artifacts in jenkins pipeline tab (UI)
+     archiveArtifacts '**/target/*.jar'
+    }
+   }
+  }
 
   stage('Deploy Artifact To Nexus') {
    when {
