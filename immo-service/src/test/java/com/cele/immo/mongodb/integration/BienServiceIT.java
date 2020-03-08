@@ -35,7 +35,7 @@ import static org.assertj.core.api.BDDAssertions.then;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableAutoConfiguration
 @Slf4j
-public class BienServiceTest {
+public class BienServiceIT {
     @Autowired
     BienService bienService;
     @Autowired

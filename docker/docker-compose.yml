@@ -1,0 +1,52 @@
+version: '3.5'
+
+services:
+
+  jenkins:
+    image: jenkinsci/blueocean
+    user: "root"
+    volumes:
+      - ./jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock  # Expose the docker daemon in the container
+      - ./jenkins-data/.m2:/var/jenkins_home/.m2/repository
+    ports:
+      - '8080:8080'
+    networks:
+      - devops
+  nexus:
+    image: sonatype/nexus3
+    volumes:
+      - ./nexus-data:/nexus-data
+    ports:
+      - '8081:8081'
+    networks:
+      - devops
+  sonarqube:
+    image: sonarqube
+    ports:
+      - '9000:9000'
+    networks:
+      - devops
+    environment:
+      - sonar.jdbc.username=sonar
+      - sonar.jdbc.password=sonar
+      - sonar.jdbc.url=jdbc:postgresql://db/sonar
+    volumes:
+      - ./sonarqube_conf:/opt/sonarqube/conf
+      - ./sonarqube_data:/opt/sonarqube/data
+      - ./sonarqube_extensions:/opt/sonarqube/extensions
+      - ./sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
+  db:
+    image: postgres
+    networks:
+      - devops
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+    volumes:
+      - ./postgresql:/var/lib/postgresql
+      - ./postgresql_data:/var/lib/postgresql/data
+networks:
+  devops:
+    driver: bridge
+
