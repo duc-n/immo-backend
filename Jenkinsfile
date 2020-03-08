@@ -94,7 +94,7 @@ stage('Sonarqube') {
 }
   stage('Deploy Artifact To Nexus') {
    when {
-    anyOf { branch 'master'; branch 'develop' }
+    anyOf { branch 'master'; branch 'dev' }
    }
    steps {
     script {
@@ -142,7 +142,7 @@ stage('Sonarqube') {
   }
   stage('Deploy to Staging Servers') {
    when {
-    anyOf { branch 'master'; branch 'develop' }
+    anyOf { branch 'master'; branch 'dev' }
    }
    agent {
     docker {
