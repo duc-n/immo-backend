@@ -32,14 +32,14 @@ pipeline {
       agent {
             docker {
             image 'maven:3.6.0-jdk-8-alpine'
-            args '-v /root/.m2/repository:/root/.m2/repository'
+            args '-v ~/.m2/repository:/root/.m2/repository'
             // to use the same node and workdir defined on top-level pipeline for all docker agents
             reuseNode true
             }
       }
       steps {
           withSonarQubeEnv('SonarCele') {
-              sh 'mvn clean install -U -DskipTests sonar:sonar -Dsonar.login=4f07d4d15d7774a6b360783d0da931e31cd6172b'
+              sh 'mvn clean install -U -DskipTests sonar:sonar'
           }
           timeout(time: 10, unit: 'MINUTES') {
               waitForQualityGate abortPipeline: true
@@ -54,7 +54,7 @@ pipeline {
    agent {
     docker {
      image 'maven:3.6.0-jdk-8-alpine'
-     args '-v /root/.m2/repository:/root/.m2/repository'
+     args '-v ~/.m2/repository:/root/.m2/repository'
      reuseNode true
     }
    }
@@ -74,7 +74,7 @@ pipeline {
    agent {
     docker {
      image 'maven:3.6.0-jdk-8-alpine'
-     args '-v /root/.m2/repository:/root/.m2/repository'
+     args '-v ~/.m2/repository:/root/.m2/repository'
      reuseNode true
     }
    }

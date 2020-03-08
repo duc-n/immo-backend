@@ -5,7 +5,7 @@
     <groupId>com.cele.immo</groupId>
     <artifactId>immo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>parent-project</name>
+    <name>immo-backend</name>
     <packaging>pom</packaging>
     <description>Immo Spring Boot</description>
 
