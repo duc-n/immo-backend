@@ -12,7 +12,7 @@ Name : jenkins
 Url : http://localhost:8080/sonarqube-webhook/
 
 
-Jenkins Plugin Installation : SonarQube Scanner, CheckStyles
+Jenkins Plugin Installation : SonarQube Scanner, CheckStyles, Pipeline Utility Steps
 
 Configuration :
 

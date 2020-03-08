@@ -145,7 +145,7 @@ stage('Sonarqube') {
    }
    agent {
     docker {
-     image 'ahmed24khaled/ansible-management'
+     image 'celeduc/microservice-docker-immo-service'
      reuseNode true
     }
    }
@@ -179,7 +179,7 @@ stage('Sonarqube') {
    }
    agent {
     docker {
-     image 'ahmed24khaled/ansible-management'
+     image 'celeduc/microservice-docker-immo-service'
      reuseNode true
     }
    }
