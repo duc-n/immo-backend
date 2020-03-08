@@ -6,17 +6,18 @@ pipeline {
   // This can be http or https
   NEXUS_PROTOCOL = "http"
   // Where your Nexus is running. In my case:
-  NEXUS_URL = "localhost:8081"
+  NEXUS_URL = "nexus:8081"
   // Repository where we will upload the artifact
   NEXUS_REPOSITORY = "maven-snapshots"
-  // Jenkins credential id to authenticate to Nexus OSS
+  // Jenkins credential id to authenticate to Nexus OSS (Created in Jenkins Credentials Management)
   NEXUS_CREDENTIAL_ID = "nexus-credentials"
   /*
-    Windows: set the ip address of docker host. In my case 192.168.99.100.
-    to obtains this address : $ docker-machine ip
+    Windows: set the ip address of docker host. In my case 192.168.43.22.
+    to obtains this address : $ docker-machine ip or
+    ifconfig | grep "inet " | grep -v 127.0.0.1 => inet 192.168.43.22 netmask 0xffffff00 broadcast 192.168.43.255
     Linux: set localhost to SONARQUBE_URL
   */
-  SONARQUBE_URL = "http://localhost"
+  SONARQUBE_URL = "http://192.168.43.22"
   SONARQUBE_PORT = "9000"
  }
  options {
@@ -100,9 +101,9 @@ stage('Sonarqube') {
      unstash 'pom'
      unstash 'artifact'
      // Read POM xml file using 'readMavenPom' step , this step 'readMavenPom' is included in: https://plugins.jenkins.io/pipeline-utility-steps
-     pom = readMavenPom file: "pom.xml";
+     pom = readMavenPom file: "immo-service/pom.xml";
      // Find built artifact under target folder
-     filesByGlob = findFiles(glob: "**/target/*.${pom.packaging}");
+     filesByGlob = findFiles(glob: "immo-service/target/*.${pom.packaging}");
      // Print some info from the artifact found
      echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
      // Extract the path from the File found

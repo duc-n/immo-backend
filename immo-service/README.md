@@ -11,8 +11,10 @@ In administration Tab: => Configuration => Webhooks, create a new wekhooks :
 Name : jenkins
 Url : http://localhost:8080/sonarqube-webhook/
 
+Log into the server : docker exec -it docker_nexus_1 /bin/bash
 
-Jenkins Plugin Installation : SonarQube Scanner, CheckStyles, Pipeline Utility Steps
+Get ip Adresse : sudo docker inspect -f "{{ .NetworkSettings.IPAddress }}" docker_nexus_1
+Jenkins Plugin Installation : SonarQube Scanner, CheckStyles, Pipeline Utility Steps, Nexus Artifact Uploader
 
 Configuration :
 
