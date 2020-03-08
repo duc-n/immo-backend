@@ -11,7 +11,7 @@ Configuration :
 Start docker compose : docker-compose up
 Get ip address of SonarQube : 
 get container id : docker ps => e64ab815d2c6
-docker inspect --format '{{ .NetworkSettings.IPAddress }}' c30b65d7efc5 =>172.19.0.5
+docker inspect --format '{{ .NetworkSettings.IPAddress }}' 0ac86b6afe78 =>172.19.0.5
 
 In Jenkins : Install SonarQubeScanner plugin, checkstyles, 
 SonarQube servers :

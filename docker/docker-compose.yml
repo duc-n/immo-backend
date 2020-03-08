@@ -10,7 +10,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock  # Expose the docker daemon in the container
       - ./jenkins-data/.m2:/var/jenkins_home/.m2/repository
     ports:
-      - "8085:8080"
+      - '8080:8080'
     networks:
       - devops
   nexus:
@@ -18,15 +18,13 @@ services:
     volumes:
       - ./nexus-data:/nexus-data sonatype/nexus3
     ports:
-      - "8081:8081"
+      - '8081:8081'
     networks:
       - devops
   sonarqube:
     image: sonarqube
-    expose:
-      - 9000
     ports:
-      - "127.0.0.1:9000:9000"
+      - '9000:9000'
     networks:
       - devops
     environment:
@@ -50,6 +48,5 @@ services:
       - ./postgresql_data:/var/lib/postgresql/data
 networks:
   devops:
-    name: devops
     driver: bridge
 
