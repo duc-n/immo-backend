@@ -8,7 +8,7 @@ services:
     volumes:
       - ./jenkins-data:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock  # Expose the docker daemon in the container
-      - ./jenkins-data/.m2:/var/jenkins_home/.m2/repository
+      - ./jenkins-data/.m2/repository:/var/jenkins_home/.m2/repository
     ports:
       - '8080:8080'
     networks:
