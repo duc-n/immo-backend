@@ -17,7 +17,7 @@ pipeline {
     ifconfig | grep "inet " | grep -v 127.0.0.1 => inet 192.168.43.22 netmask 0xffffff00 broadcast 192.168.43.255
     Linux: set localhost to SONARQUBE_URL
   */
-  SONARQUBE_URL = "http://192.168.43.22"
+  SONARQUBE_URL = "http://192.168.1.23"
   SONARQUBE_PORT = "9000"
  }
  options {
