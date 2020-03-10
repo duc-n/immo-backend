@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.cele.immo</groupId>
@@ -8,12 +8,225 @@
     <name>immo-backend</name>
     <packaging>pom</packaging>
     <description>Immo Spring Boot</description>
-
+    <properties>
+        <!-- Project configuration -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+    </properties>
     <modules>
         <!--<module>config</module>
         <module>discovery-service</module>
         <module>api-gateway</module>-->
         <module>immo-service</module>
     </modules>
+    <profiles>
+        <profile>
+            <id>quality_control</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <!-- SonarQube and Jacoco tests reports -->
+                <surefire.version>2.22.2</surefire.version>
+                <jacoco.version>0.8.3</jacoco.version>
+                <!-- Sonar global configuration -->
+                <sonar.language>java</sonar.language>
+                <sonar.sourceEncoding>${project.reporting.outputEncoding}</sonar.sourceEncoding>
+                <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+                <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+                <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+                <!-- Dependencies checks (OWASP) reports -->
+                <!-- sonar.dependencyCheck.reportPath>${project.build.directory}/dependency-check-report.xml</sonar.dependencyCheck.reportPath -->
+                <!-- Tell sonar where to look for the UNIT coverage files. Property inherited by submodules -->
+                <sonar.junit.reportPaths>${project.build.directory}/surefire-reports</sonar.junit.reportPaths>
+                <sonar.jacoco.reportPath>${project.build.directory}/jacoco.exec</sonar.jacoco.reportPath>
+                <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml
+                </sonar.coverage.jacoco.xmlReportPaths>
+                <!-- Integration tests -->
+                <sonar.jacoco.itReportPath>${project.build.directory}/jacoco-it.exec</sonar.jacoco.itReportPath>
+            </properties>
 
+            <!-- To generate units and integrations test reports -->
+            <build>
+                <plugins>
+                    <!-- To run UNIT tests and generate execution reports. These reports are required for SonarQube -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${surefire.version}</version>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/*IT</exclude>
+                            </excludes>
+                            <!-- to get jacoco report we need to set argLine in surefire,
+                      without this snippet the jacoco argLine is lost -->
+                            <!-- The property must be prefixed with @ and not $. The reason for this is the usage of late
+                            binding of variables by other plugins (jacoco in this case)-->
+                            <argLine>@{jacocoArgLine} -Xms1024m -Xmx3072m</argLine>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-mapstruct-license</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/classes/META-INF</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${basedir}/..</directory>
+                                            <filtering>false</filtering>
+                                            <include>LICENSE.txt</include>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- To run INTEGRATION tests and generate execution reports. These reports are required for SonarQube -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${surefire.version}</version>
+                        <configuration>
+                            <includes>
+                                <include>**/*IT</include>
+                            </includes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>default-integration-test</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <version>3.6.1</version>
+                        <configuration>
+                            <source>${java.version}</source>
+                            <target>${java.version}</target>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.mapstruct</groupId>
+                                    <artifactId>mapstruct-processor</artifactId>
+                                    <version>${mapstruct.version}</version>
+                                </path>
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                    <version>${lombok.version}</version>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </plugin>
+
+                    <!-- JACOCO test coverage plugin.
+                         Use it to compile SUREFIRE (unit tests) and FAILSAFE (integration tests) reports for SonarQube
+                         (i) attach that plugin to Maven TEST phase
+                         Reports are generated in "${project.build.directory}/site/jacoco/*" by default
+                         Good documentations:
+                            https://wiki.onap.org/display/DW/Implementing+Code+Coverage
+                            https://www.devcon5.ch/en/blog/2015/05/29/multi-module-integration-test-coverage-sonar-jacoco/
+                            https://www.eclemma.org/jacoco/trunk/doc/maven.html
+                         -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
+                        <configuration>
+                            <append>true</append>
+                            <!-- Use offline bytecode (with powermock changes) -->
+                            <excludes>
+                                <exclude>*</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <!-- Support for PowerMock tests -->
+                            <!-- See https://www.igorkromin.net/index.php/2018/03/06/quick-look-at-jacoco-vs-cobertura-performance-and-coverage-results/ -->
+                            <execution>
+                                <id>jacoco-instrument</id>
+                                <goals>
+                                    <goal>instrument</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>jacoco-restore-instrumented-classes</id>
+                                <goals>
+                                    <goal>restore-instrumented-classes</goal>
+                                </goals>
+                            </execution>
+                            <!-- ## UNIT TESTS ## -->
+                            <!-- Configure JaCoCo runtime agent. It is passed as VM argument when Maven SUREFIRE plugin is executed. -->
+                            <execution>
+                                <id>pre-unit-tests</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <!-- Create reports -->
+                            <execution>
+                                <id>report-unit-tests</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                            <!-- ## INTEGRATION TESTS ## -->
+                            <!-- Configure JaCoCo runtime agent. It is passed as VM argument when Maven FAILSAFE plugin is executed. -->
+                            <execution>
+                                <id>pre-integration-tests</id>
+                                <goals>
+                                    <goal>prepare-agent-integration</goal>
+                                </goals>
+                            </execution>
+                            <!-- Create reports -->
+                            <execution>
+                                <id>report-integration-tests</id>
+                                <goals>
+                                    <goal>report-integration</goal>
+                                </goals>
+                            </execution>
+                            <!-- ## MERGE ALL TESTS reports ## -->
+                            <execution>
+                                <id>merge</id>
+                                <goals>
+                                    <goal>merge</goal>
+                                </goals>
+                                <configuration>
+                                    <!-- Only 1 destination file to aggregate ALL integration tests reports -->
+                                    <!-- the "session.executionRootDirectory" = parent folder that is being build by Jenkins -->
+                                    <destFile>${session.executionRootDirectory}/target/jacoco-it.exec</destFile>
+                                    <fileSets>
+                                        <fileSet implementation="org.apache.maven.shared.model.fileset.FileSet">
+                                            <directory>${project.build.directory}</directory>
+                                            <includes>
+                                                <include>**/*.exec</include>
+                                            </includes>
+                                        </fileSet>
+                                    </fileSets>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- SonarQube engine -->
+                    <plugin>
+                        <groupId>org.sonarsource.scanner.maven</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                        <!-- Do not forget to change version in JenkinsFile as well -->
+                        <version>3.6.0.1398</version>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
