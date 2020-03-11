@@ -33,6 +33,25 @@ pipeline {
    }
   } // End stage SCM
 
+    stage('Sonarqube') {
+    agent {
+          docker {
+          image 'maven:3.6.0-jdk-8-alpine'
+          args '-v /Users/cele/.m2/:/root/.m2/'
+          // to use the same node and workdir defined on top-level pipeline for all docker agents
+          reuseNode true
+          }
+    }
+    steps {
+        withSonarQubeEnv('SonarCele') {
+            sh 'mvn clean install -Pquality_control -Dio.netty.noUnsafe=true'
+        }
+        //timeout(time: 3, unit: 'MINUTES') {
+          //  waitForQualityGate abortPipeline: true
+        //}
+    }
+  } // End stage Sonarqube
+
   stage('Unit Tests') {
    when {
     anyOf { branch 'master'; branch 'dev' }
