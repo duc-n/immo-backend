@@ -20,15 +20,18 @@ pipeline {
   SONARQUBE_URL = "http://192.168.1.23"
   SONARQUBE_PORT = "9000"
  }
+
  options {
   skipDefaultCheckout()
  }
+// End options
  stages {
+
   stage('SCM') {
    steps {
     checkout scm
    }
-  }
+  } // End stage SCM
 
   stage('Unit Tests') {
    when {
@@ -49,7 +52,8 @@ pipeline {
      junit '**/target/surefire-reports/**/*.xml'
     }
    }
-  }
+  } // End stage Unit Tests
+
   stage('Build Package') {
    when {
     anyOf { branch 'master'; branch 'dev' }
@@ -72,26 +76,27 @@ pipeline {
      archiveArtifacts '**/target/*.jar'
     }
    }
-  }
+  } // End stage Build Package
 
-stage('Sonarqube') {
-  agent {
-        docker {
-        image 'maven:3.6.0-jdk-8-alpine'
-        args '-v $HOME/.m2/repository:/root/.m2/repository'
-        // to use the same node and workdir defined on top-level pipeline for all docker agents
-        reuseNode true
+  stage('Sonarqube') {
+    agent {
+          docker {
+          image 'maven:3.6.0-jdk-8-alpine'
+          args '-v $HOME/.m2/repository:/root/.m2/repository'
+          // to use the same node and workdir defined on top-level pipeline for all docker agents
+          reuseNode true
+          }
+    }
+    steps {
+        withSonarQubeEnv('SonarCele') {
+            sh 'mvn clean install -U -DskipTests sonar:sonar'
         }
-  }
-  steps {
-      withSonarQubeEnv('SonarCele') {
-          sh 'mvn clean install -U -DskipTests sonar:sonar'
-      }
-      //timeout(time: 3, unit: 'MINUTES') {
-        //  waitForQualityGate abortPipeline: true
-      //}
-  }
-}
+        //timeout(time: 3, unit: 'MINUTES') {
+          //  waitForQualityGate abortPipeline: true
+        //}
+    }
+  } // End stage Sonarqube
+
   stage('Deploy Artifact To Nexus') {
    when {
     anyOf { branch 'master'; branch 'dev' }
@@ -139,7 +144,8 @@ stage('Sonarqube') {
      }
     }
    }
-  }
+  } // End stage Deploy
+
   stage('Deploy to Staging Servers') {
    when {
     anyOf { branch 'master'; branch 'dev' }
@@ -173,8 +179,9 @@ stage('Sonarqube') {
      }
     }
    }
-  }
-   stage('Deploy to Production Servers') {
+  }// End stage Deploy to Staging
+
+  stage('Deploy to Production Servers') {
    when {
     branch 'master'
    }
@@ -207,7 +214,8 @@ stage('Sonarqube') {
      }
     }
    }
-  }
- }
+  }// End stage Deploy to Production
+
+ } // End stages
 }
 
