@@ -33,25 +33,6 @@ pipeline {
    }
   } // End stage SCM
 
-    stage('Sonarqube') {
-    agent {
-          docker {
-          image 'maven:3.6.0-jdk-8-alpine'
-          args '-v /Users/cele/.m2/:/root/.m2/'
-          // to use the same node and workdir defined on top-level pipeline for all docker agents
-          reuseNode true
-          }
-    }
-    steps {
-        withSonarQubeEnv('SonarCele') {
-            sh 'mvn clean install -Pquality_control -Dio.netty.noUnsafe=true'
-        }
-        //timeout(time: 3, unit: 'MINUTES') {
-          //  waitForQualityGate abortPipeline: true
-        //}
-    }
-  } // End stage Sonarqube
-
   stage('Unit Tests') {
    when {
     anyOf { branch 'master'; branch 'dev' }
@@ -59,7 +40,7 @@ pipeline {
    agent {
     docker {
      image 'maven:3.6.0-jdk-8-alpine'
-     args '-v /Users/cele/.m2/:/root/.m2/'
+     args '-v $HOME/.m2/repository:/root/.m2/repository'
      reuseNode true
     }
    }
@@ -80,7 +61,7 @@ pipeline {
    agent {
     docker {
      image 'maven:3.6.0-jdk-8-alpine'
-     args '-v /Users/cele/.m2/:/root/.m2/'
+     args '-v $HOME/.m2/repository:/root/.m2/repository'
      reuseNode true
     }
    }
@@ -97,6 +78,24 @@ pipeline {
    }
   } // End stage Build Package
 
+  stage('Sonarqube') {
+    agent {
+          docker {
+          image 'maven:3.6.0-jdk-8-alpine'
+          args '-v $HOME/.m2/repository:/root/.m2/repository'
+          // to use the same node and workdir defined on top-level pipeline for all docker agents
+          reuseNode true
+          }
+    }
+    steps {
+        withSonarQubeEnv('SonarCele') {
+            sh 'mvn clean install -U -DskipTests sonar:sonar'
+        }
+        //timeout(time: 3, unit: 'MINUTES') {
+          //  waitForQualityGate abortPipeline: true
+        //}
+    }
+  } // End stage Sonarqube
 
   stage('Deploy Artifact To Nexus') {
    when {
