@@ -46,6 +46,7 @@ public class BienServiceIT {
     PBKDF2Encoder passwordEncoder;
 
     UserAccount userAdmin = UserAccount.builder()
+            .id("id1")
             .username("admin@gmail.com")
             .password("password")
             .telephone("0686955644")
@@ -56,6 +57,7 @@ public class BienServiceIT {
             .build();
 
     UserAccount user = UserAccount.builder()
+            .id("id2")
             .username("user@gmail.com")
             .password("password")
             .telephone("0686955644")
@@ -227,7 +229,7 @@ public class BienServiceIT {
     public void givenUserObject_whenSave_thenCreateNewUser() {
 
         Publisher<UserAccount> setup = this.userAccountRepository.deleteAll()
-                .thenMany(this.userAccountRepository.saveAll(Flux.just(userAdmin, user))
+                .thenMany(this.userAccountRepository.saveAll(Flux.just(userAdmin))
                 );
 
         Publisher<UserAccount> find = this.userAccountRepository.findByNom("nguyen");
@@ -238,7 +240,7 @@ public class BienServiceIT {
 
         StepVerifier
                 .create(setup)
-                .expectNext(userAdmin, user)
+                .expectNext(userAdmin)
                 .verifyComplete();
 
     }

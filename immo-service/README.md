@@ -31,3 +31,6 @@ In Jenkins : Install SonarQubeScanner plugin, checkstyles,
 SonarQube servers :
 Namev: SonarCele
 URL du serveur : http://192.168.43.22:9000
+
+Build maven test : 
+mvn clean install -Pquality_control -Dio.netty.noUnsafe=true
