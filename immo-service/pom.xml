@@ -221,6 +221,9 @@
                     <forkCount>3</forkCount>
                     <reuseForks>true</reuseForks>
                     <argLine>-Xmx1024m -XX:MaxPermSize=256m</argLine>
+                    <argLine>@{jacocoArgLine} -Xms1024m -Xmx3072m</argLine>
+                    <!-- Avoid The forked VM terminated without properly saying goodbye. VM crash or System.exit called?-->
+                    <useSystemClassLoader>false</useSystemClassLoader>
                 </configuration>
             </plugin>
             <plugin>
